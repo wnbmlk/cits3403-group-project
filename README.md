@@ -4,9 +4,9 @@ Group project repository for CITS3403 Agile Web Development.
 
 ## Team Members
 
-- [Abbas Fadaee] – Student ID: 24280931
-- [Chris Chandra] – Student ID: 23993402
-- [Samuel Bengtsson] – Student ID: 21703254
+- [Abbas Fadaee] – Student ID: 24280931 - abbas-f
+- [Chris Chandra] – Student ID: 23993402 - 
+- [Samuel Bengtsson] – Student ID: 21703254 - AprioriCaffeination
 - [Wenbo Zhong] – Student ID: 24247407
 
 ## Description
