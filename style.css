@@ -1,10 +1,26 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 40px;
+    margin: 0;
 }
 
-button {
+header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+}
+
+nav a {
+    color: white;
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+main {
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
     padding: 10px;
-    background-color: lightblue;
-    border: none;
+    background: #ecf0f1;
 }
