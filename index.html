@@ -1,19 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>CITS3403 Group Project</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Movie Review Hub</title>
+        <link rel="stylesheet" href="index.html">
+
 </head>
 
 <body>
 
-<h1>Welcome to our CITS3403 Project</h1>
+<h1>Movie Review Hub</h1>
 
-<p>This is the starter page for our web application.</p>
+<nav>
+    <a href="#">Home</a>
+    <a href="#">Movies</a>
+    <a href="#">Login</a>
+</nav>
 
-<button id="btn">Click Me</button>
+<hr>
 
-<script src="script.js"></script>
+<h2>Welcome</h2>
+<p>A place to review and rate movies.</p>
+
+
+<h2>Movies</h2>
+
+<div class="movie">
+<h3>The Matrix</h3>
+<p>Rating: 8.7</p>
+</div>
+
+<div class="movie">
+<h3>Inception</h3>
+<p>Rating: 8.8</p>
+</div>
+
+
+
+<h2>Login</h2>
+
+<form id="loginForm">
+
+<label>Username</label>
+<input type="text" id="username">
+
+<label>Password</label>
+<input type="password" id="password">
+
+<button type="submit">Login</button>
+
+</form>
 
 </body>
 </html>

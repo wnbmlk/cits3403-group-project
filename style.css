@@ -1,10 +1,15 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 40px;
+body{
+    font-family: Arial;
+    margin: 20px;
 }
 
-button {
+nav a{
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+.movie{
+    border: 1px solid #ccc;
     padding: 10px;
-    background-color: lightblue;
-    border: none;
+    margin: 10px;
 }
