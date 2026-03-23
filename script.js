@@ -1,3 +1,5 @@
-document.getElementById("btn").addEventListener("click", function() {
-    alert("Hello from CITS3403!");
+document.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+        alert("Checkpoint 2 mockup only");
+    });
 });
