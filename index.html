@@ -1,24 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Review Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h1>Movie Review Hub</h1>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Movie Review Hub</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="#">Home</a>
+                <a class="nav-link" href="#">Movies</a>
+                <a class="nav-link" href="#">Login</a>
+                <a class="nav-link" href="#">Sign Up</a>
+            </div>
+        </div>
+    </nav>
 
-<nav>
-    <a href="#">Home</a>
-    <a href="#">Movies</a>
-    <a href="#">Login</a>
-</nav>
+    <header class="hero-section text-center text-white d-flex align-items-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Discover, Rate, and Review Movies</h1>
+            <p class="lead">A simple web app for movie lovers to share opinions and explore reviews.</p>
+            <a href="#" class="btn btn-warning btn-lg mt-3">Browse Movies</a>
+        </div>
+    </header>
 
-<hr>
+    <main class="container my-5">
+        <h2 class="mb-4">Popular Movies</h2>
+        <div class="row g-4">
 
-<h2>Welcome</h2>
-<p>A place to review and rate movies.</p>
+            <div class="col-md-4">
+                <div class="card movie-card h-100">
+                    <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Movie Poster">
+                    <div class="card-body">
+                        <h5 class="card-title">Inception</h5>
+                        <p class="card-text">A science fiction thriller about dreams within dreams.</p>
+                        <p class="text-muted">Average Rating: 4.8 / 5</p>
+                        <a href="#" class="btn btn-outline-dark">View Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card movie-card h-100">
+                    <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Movie Poster">
+                    <div class="card-body">
+                        <h5 class="card-title">Interstellar</h5>
+                        <p class="card-text">A space exploration film about survival and time.</p>
+                        <p class="text-muted">Average Rating: 4.7 / 5</p>
+                        <a href="#" class="btn btn-outline-dark">View Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card movie-card h-100">
+                    <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Movie Poster">
+                    <div class="card-body">
+                        <h5 class="card-title">The Dark Knight</h5>
+                        <p class="card-text">A superhero crime drama with strong reviews worldwide.</p>
+                        <p class="text-muted">Average Rating: 4.9 / 5</p>
+                        <a href="#" class="btn btn-outline-dark">View Details</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">CITS3403 Group Project - Movie Review Hub</p>
+    </footer>
 
 </body>
 </html>
