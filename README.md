@@ -13,3 +13,8 @@ Group project repository for CITS3403 Agile Web Development.
 
 This repository contains the group project for CITS3403.  
 Further project details will be updated as development progresses.
+
+## Technologies
+- HTML
+- CSS
+- JavaScript
