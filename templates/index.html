@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Review Hub</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
@@ -17,7 +17,7 @@
             <a href="#">Home</a>
             <a href="#movies">Movies</a>
             <a href="#login">Login</a>
-            <a href="pages/about.html">About</a>
+            <a href="/about">About</a>
         </div>
     </div>
 </nav>
@@ -95,7 +95,7 @@
     <p>CITS3403 Project</p>
 </footer>
 
-<script src="script.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>
