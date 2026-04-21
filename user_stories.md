@@ -10,3 +10,9 @@
 1. As a user, I want to be able to interact and connect with other users.
 1. As a user, I want to view my connections’ timelines so I can see what they have been watching.
 1. As a user, I want to be able to log out so that I can securely exit my account.
+
+
+
+
+
+
