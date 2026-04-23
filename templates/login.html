@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login | Movie Diary</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
+	<main class="login-shell">
+		<section class="brand-panel">
+			<p class="eyebrow">Project name coming soon</p>
+			<h1>Keep your movie journey in one place.</h1>
+			<p class="brand-copy">
+				Use this app like a simple diary to remember what you watched and what you want to watch next.
+			</p>
+			<div class="feature-list">
+				<span>Save watched movies</span>
+				<span>Save watch-later movies</span>
+				<span>Find titles again easily</span>
+			</div>
+		</section>
+
+		<section class="form-panel" aria-labelledby="login-heading">
+			<div class="form-card">
+				<p class="back-home"><a href="{{ url_for('home') }}">Back to Home</a></p>
+				<h2 id="login-heading">Welcome back</h2>
+				<p class="form-subtitle">Sign in to continue your movie diary.</p>
+
+				<form>
+					<label for="email">Email</label>
+					<input
+						id="email"
+						name="email"
+						type="email"
+						placeholder="you@example.com"
+						autocomplete="email"
+						required
+					>
+
+					<label for="password">Password</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						placeholder="Enter password"
+						autocomplete="current-password"
+						required
+					>
+
+					<div class="form-row">
+						<label class="checkbox-wrap" for="remember">
+							<input id="remember" type="checkbox" name="remember">
+							<span>Remember me</span>
+						</label>
+						<a href="#">Forgot password?</a>
+					</div>
+
+					<button type="submit">Log In</button>
+				</form>
+
+				<p class="signup-note">
+					New here? <a href="{{ url_for('signup') }}">Create an account</a>
+				</p>
+			</div>
+		</section>
+	</main>
+</body>
+</html>

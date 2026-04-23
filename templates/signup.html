@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Sign Up | Movie Diary</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
+	<main class="login-shell">
+		<section class="brand-panel">
+			<p class="eyebrow">Create account</p>
+			<h1>Start your movie diary.</h1>
+			<p class="brand-copy">
+				Create an account to save watched movies, keep a watchlist, and share selected entries on your public profile.
+			</p>
+			<div class="feature-list">
+				<span>Personal diary</span>
+				<span>Public profile</span>
+				<span>Saved watch history</span>
+			</div>
+		</section>
+
+		<section class="form-panel" aria-labelledby="signup-heading">
+			<div class="form-card">
+				<p class="back-home"><a href="{{ url_for('home') }}">Back to Home</a></p>
+				<h2 id="signup-heading">Sign up</h2>
+				<p class="form-subtitle">Create your account to continue.</p>
+
+				<form>
+					<label for="username">Username</label>
+					<input id="username" name="username" type="text" placeholder="Choose a username" required>
+
+					<label for="email">Email</label>
+					<input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+					<label for="password">Password</label>
+					<input id="password" name="password" type="password" placeholder="Create password" required>
+
+					<button type="submit">Create Account</button>
+				</form>
+
+				<p class="signup-note">
+					Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+				</p>
+			</div>
+		</section>
+	</main>
+</body>
+</html>
