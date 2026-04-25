@@ -108,6 +108,7 @@ function renderTimeline() {
         const image = movieNode.querySelector("img");
         const title = movieNode.querySelector("h3");
         const status = movieNode.querySelector("p");
+        const removeButton = movieNode.querySelector(".remove-card");
 
         article.dataset.index = index;
         timeStamp.textContent = item.date || "New entry";
@@ -115,6 +116,7 @@ function renderTimeline() {
         image.alt = `${item.title} poster`;
         title.textContent = item.title;
         status.textContent = `${item.status}${item.year ? ` • ${item.year}` : ""}`;
+        removeButton.addEventListener("click", () => removeMovieFromTimeline(index));
 
         timelineTrack.appendChild(movieNode);
     });
@@ -185,6 +187,13 @@ function addMovieToTimeline(movie) {
     saveTimelineItems(items);
     renderTimeline();
     closeModal();
+}
+
+function removeMovieFromTimeline(index) {
+    const items = getTimelineItems();
+    items.splice(index, 1);
+    saveTimelineItems(items);
+    renderTimeline();
 }
 
 movieSearch.addEventListener("input", () => {
