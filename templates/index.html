@@ -16,44 +16,27 @@
         <div class="nav-links">
             <a href="{{ url_for('home') }}">Home</a>
             <a href="#diary">Diary</a>
-            <a href="#profiles">Profiles</a>
+            <a href="{{ url_for('profile') }}">Profile</a>
             <a href="{{ url_for('login') }}">Login</a>
             <a href="{{ url_for('about') }}">About</a>
         </div>
     </div>
 </nav>
 
-<!-- ===== Hero ===== -->
-<header class="hero">
-    <div class="container hero-inner">
-        <div class="hero-left">
-            <p class="tag">Checkpoint 2</p>
-            <h1>Keep track of every<br>movie and series<br>you watch.</h1>
-            <p class="desc">
-                A simple movie diary where users can save what they watched,
-                what they want to watch next, and share selected activity on a public profile.
-            </p>
-            <div class="buttons">
-                <button type="button">Explore diary</button>
-                <button class="outline" type="button" onclick="location.href='{{ url_for('login') }}'">Login</button>
-            </div>
-        </div>
-
-        <div class="hero-right">
-            <div class="box">
-                <h3>Planned pages</h3>
-                <ul>
-                    <li>Home</li>
-                    <li>Login</li>
-                    <li>Sign up</li>
-                    <li>Diary</li>
-                    <li>Search users</li>
-                    <li>Public profile</li>
-                </ul>
-            </div>
+<!-- ===== Intro ===== -->
+<section class="section">
+    <div class="container">
+        <h1>Movie Diary</h1>
+        <p class="desc">
+            Save what you watched, keep a watchlist, and view selected public profile activity.
+        </p>
+        <div class="buttons">
+            <a class="btn" href="#diary">Explore diary</a>
+            <a class="btn outline" href="{{ url_for('login') }}">Login</a>
+            <a class="btn outline" href="{{ url_for('signup') }}">Sign up</a>
         </div>
     </div>
-</header>
+</section>
 
 <!-- ===== Diary ===== -->
 <section id="diary" class="section">
@@ -79,26 +62,6 @@
     </div>
 </section>
 
-<!-- ===== Profiles ===== -->
-<section id="profiles" class="section">
-    <div class="container">
-        <h2>Public profiles</h2>
-        <p class="desc">Users can search other profiles and view shared tabs like watched, watching, want to watch, and favourites.</p>
-    </div>
-</section>
-
-<!-- ===== Login ===== -->
-<section id="login" class="section">
-    <div class="container">
-        <h2>Login</h2>
-
-        <form class="form">
-            <input type="text" placeholder="Username">
-            <input type="password" placeholder="Password">
-            <button type="button">Login</button>
-        </form>
-    </div>
-</section>
 
 <!-- ===== Footer ===== -->
 <footer class="footer">
