@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary Timeline | Movie Diary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='diary.css') }}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="container nav-content">
+        <div class="logo">Movie Diary</div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('diary') }}">Diary</a>
+            <a href="{{ url_for('profile') }}">Profile</a>
+            <a href="{{ url_for('login') }}">Login</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container page-wrap">
+    <header class="page-head">
+        <h1>Diary Timeline</h1>
+        <p>Scroll left to right to view your movie journey.</p>
+    </header>
+
+    <section class="timeline-wrap" aria-label="Movie timeline">
+        <div class="timeline-line"></div>
+
+        <article class="timeline-item">
+            <p class="time-stamp">Apr 02, 2026 • 20:10</p>
+            <div class="movie-card">
+                <img src="https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" alt="Parasite poster">
+                <div class="movie-meta">
+                    <h3>Parasite</h3>
+                    <p>Watched</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item">
+            <p class="time-stamp">Apr 05, 2026 • 22:00</p>
+            <div class="movie-card">
+                <img src="https://image.tmdb.org/t/p/w342/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="Interstellar poster">
+                <div class="movie-meta">
+                    <h3>Interstellar</h3>
+                    <p>Rewatch</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item">
+            <p class="time-stamp">Apr 09, 2026 • 19:30</p>
+            <div class="movie-card">
+                <img src="https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="The Dark Knight poster">
+                <div class="movie-meta">
+                    <h3>The Dark Knight</h3>
+                    <p>Favourite</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item">
+            <p class="time-stamp">Apr 12, 2026 • 21:15</p>
+            <div class="movie-card">
+                <img src="https://image.tmdb.org/t/p/w342/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg" alt="The Lord of the Rings poster">
+                <div class="movie-meta">
+                    <h3>LOTR: Fellowship</h3>
+                    <p>Watchlist</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="timeline-item">
+            <p class="time-stamp">Apr 17, 2026 • 23:40</p>
+            <div class="movie-card">
+                <img src="https://image.tmdb.org/t/p/w342/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg" alt="Inception poster">
+                <div class="movie-meta">
+                    <h3>Inception</h3>
+                    <p>Watched</p>
+                </div>
+            </div>
+        </article>
+    </section>
+</main>
+</body>
+</html>

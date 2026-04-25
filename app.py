@@ -22,5 +22,9 @@ def signup():
 def profile():
     return render_template("profile.html")
 
+@app.route("/diary")
+def diary():
+    return render_template("diary.html")
+
 if __name__ == "__main__":
     app.run(debug=True)
