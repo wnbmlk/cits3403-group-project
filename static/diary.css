@@ -57,6 +57,131 @@ body {
     padding: 30px 0 50px;
 }
 
+.diary-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.diary-sidebar {
+    position: sticky;
+    top: 16px;
+    display: grid;
+    gap: 16px;
+}
+
+.sidebar-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: var(--soft-shadow);
+}
+
+.sidebar-card h2 {
+    margin: 0 0 10px;
+    font-size: 1.02rem;
+}
+
+.sidebar-note {
+    margin: 0 0 12px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.filter-group {
+    display: grid;
+    gap: 8px;
+}
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.toggle-row label {
+    font-size: 0.92rem;
+    color: var(--text-main);
+}
+
+.toggle-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+}
+
+.date-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.date-range-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 10px;
+    font: inherit;
+    background: #fff;
+    margin-bottom: 10px;
+}
+
+.date-range-input:disabled {
+    background: #f3f6fa;
+    color: #8b9bad;
+}
+
+.flatpickr-calendar {
+    border: 1px solid var(--border);
+    box-shadow: var(--soft-shadow);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.filter-btn,
+.range-btn {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: #fbfcfe;
+    color: var(--text-main);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.filter-btn:hover,
+.range-btn:hover {
+    border-color: var(--accent);
+}
+
+.filter-btn.active,
+.range-btn.active {
+    background: rgba(47, 111, 159, 0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.diary-main {
+    min-width: 0;
+}
+
 .page-head h1 {
     margin: 0;
     font-size: clamp(1.6rem, 3vw, 2.2rem);
@@ -105,6 +230,19 @@ body {
     position: relative;
     min-width: 220px;
     z-index: 1;
+}
+
+.empty-timeline {
+    min-width: 220px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: var(--soft-shadow);
 }
 
 .timeline-item::before {
@@ -355,6 +493,14 @@ body {
     .nav-links a {
         margin-left: 0;
         margin-right: 12px;
+    }
+
+    .diary-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .diary-sidebar {
+        position: static;
     }
 
     .search-results {

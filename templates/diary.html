@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diary Timeline | Movie Diary</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='diary.css') }}">
 </head>
 <body>
@@ -19,15 +20,49 @@
     </div>
 </nav>
 
-<main class="container page-wrap">
-    <header class="page-head">
-        <h1>Diary Timeline</h1>
-        <p>Scroll left to right and click a plus box to add a movie to your timeline.</p>
-    </header>
+<main class="container page-wrap diary-layout">
+    <aside class="diary-sidebar" aria-label="Diary categories">
+        <div class="sidebar-card">
+            <h2>Categories</h2>
+            <div class="filter-group">
+                <button class="filter-btn active" type="button" data-category="all">All</button>
+                <button class="filter-btn" type="button" data-category="watched">Watched</button>
+                <button class="filter-btn" type="button" data-category="favorites">Favourites</button>
+                <button class="filter-btn" type="button" data-category="watching">Watching</button>
+                <button class="filter-btn" type="button" data-category="watchlist">Watchlist</button>
+            </div>
+        </div>
 
-    <section class="timeline-wrap" aria-label="Movie timeline">
-        <div class="timeline-line"></div>
-        <div id="timelineTrack" class="timeline-track"></div>
+        <div class="sidebar-card">
+            <h2>Watched timeline</h2>
+            <p class="sidebar-note">Use a custom watched range to shorten the timeline.</p>
+            <div class="toggle-row">
+                <label for="watchedRangeToggle">Custom date range</label>
+                <input id="watchedRangeToggle" type="checkbox">
+            </div>
+            <label class="date-label" for="watchedDateRange">Select range</label>
+            <input id="watchedDateRange" class="date-range-input" type="text" placeholder="Pick start and end date">
+            <div class="filter-group">
+                <button id="clearWatchedRange" class="range-btn" type="button">Clear watched range</button>
+            </div>
+        </div>
+
+        <div class="sidebar-card">
+            <h2>Help</h2>
+            <p class="sidebar-note">Choose a category or date range to narrow the timeline. The add box always stays at the end.</p>
+        </div>
+    </aside>
+
+    <section class="diary-main">
+        <header class="page-head">
+            <h1>Diary Timeline</h1>
+            <p>Scroll left to right and click a plus box to add a movie to your timeline.</p>
+        </header>
+
+        <section class="timeline-wrap" aria-label="Movie timeline">
+            <div class="timeline-line"></div>
+            <div id="timelineTrack" class="timeline-track"></div>
+        </section>
     </section>
 </main>
 
@@ -65,6 +100,7 @@
     </article>
 </template>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="{{ url_for('static', filename='diary.js') }}"></script>
 </body>
 </html>
