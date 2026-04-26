@@ -8,16 +8,19 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+
 
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     genre = db.Column(db.String(80), nullable=True)
     rating = db.Column(db.Float, nullable=True)
+
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,6 +45,14 @@ def login():
 @app.route("/signup")
 def signup():
     return render_template("signup.html")
+
+@app.route("/profile")
+def profile():
+    return render_template("profile.html")
+
+@app.route("/diary")
+def diary():
+    return render_template("diary.html")
 
 if __name__ == "__main__":
     with app.app_context():
