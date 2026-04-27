@@ -57,18 +57,47 @@ body {
     padding: 30px 0 50px;
 }
 
-.diary-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 22px;
-    align-items: start;
-}
-
+/* Below 768px: let Bootstrap's row / col-12 flexbox grid handle
+   stacking naturally (mobile & tablet).
+   Above 768px: switch to a fixed 280 px sidebar CSS Grid. */
 .diary-sidebar {
-    position: sticky;
-    top: 16px;
     display: grid;
     gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .diary-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 22px;
+        align-items: start;
+        /* Cancel Bootstrap .row negative margins so the grid
+           stays inside the container bounds */
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Neutralise Bootstrap col-* width / flex / padding so the
+       grid tracks (280px sidebar + 1fr main) are respected. */
+    .diary-layout > [class*="col-"] {
+        width: auto;
+        flex: none;
+        max-width: none;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .diary-sidebar {
+        position: sticky;
+        top: 16px;
+    }
+}
+
+/* Ensure sidebar is not sticky on smaller screens */
+@media (max-width: 767.98px) {
+    .diary-sidebar {
+        position: static;
+    }
 }
 
 .sidebar-card {
@@ -493,14 +522,6 @@ body {
     .nav-links a {
         margin-left: 0;
         margin-right: 12px;
-    }
-
-    .diary-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .diary-sidebar {
-        position: static;
     }
 
     .search-results {
