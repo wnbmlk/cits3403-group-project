@@ -1,69 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Login | Movie Diary</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Movie Diary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 <body>
-	<main class="login-shell">
-		<section class="brand-panel">
-			<p class="eyebrow">Project name coming soon</p>
-			<h1>Keep your movie journey in one place.</h1>
-			<p class="brand-copy">
-				Use this app like a simple diary to remember what you watched and what you want to watch next.
-			</p>
-			<div class="feature-list">
-				<span>Save watched movies</span>
-				<span>Save watch-later movies</span>
-				<span>Find titles again easily</span>
-			</div>
-		</section>
 
-		<section class="form-panel" aria-labelledby="login-heading">
-			<div class="form-card">
-				<p class="back-home"><a href="{{ url_for('home') }}">Back to Home</a></p>
-				<h2 id="login-heading">Welcome back</h2>
-				<p class="form-subtitle">Sign in to continue your movie diary.</p>
+<div class="login-wrap">
+    <div class="row g-3 align-items-stretch">
 
-				<form>
-					<label for="email">Email</label>
-					<input
-						id="email"
-						name="email"
-						type="email"
-						placeholder="you@example.com"
-						autocomplete="email"
-						required
-					>
+        <!-- Brand panel -->
+        <div class="col-12 col-md-6">
+            <div class="brand-panel">
+                <p class="eyebrow">Project name coming soon</p>
+                <h1>Keep your movie journey in one place.</h1>
+                <p class="brand-copy">
+                    Use this app like a simple diary to remember what you watched and what you want to watch next.
+                </p>
+                <div class="feature-list">
+                    <span>Save watched movies</span>
+                    <span>Save watch-later movies</span>
+                    <span>Find titles again easily</span>
+                </div>
+            </div>
+        </div>
 
-					<label for="password">Password</label>
-					<input
-						id="password"
-						name="password"
-						type="password"
-						placeholder="Enter password"
-						autocomplete="current-password"
-						required
-					>
+        <!-- Form panel -->
+        <div class="col-12 col-md-6">
+            <div class="form-card">
+                <p class="back-home"><a href="{{ url_for('home') }}">← Back to Home</a></p>
+                <h2>Welcome back</h2>
+                <p class="form-subtitle">Sign in to continue your movie diary.</p>
 
-					<div class="form-row">
-						<label class="checkbox-wrap" for="remember">
-							<input id="remember" type="checkbox" name="remember">
-							<span>Remember me</span>
-						</label>
-						<a href="#">Forgot password?</a>
-					</div>
+                <form>
+                    <div class="mb-2">
+                        <label for="email" class="form-label">Email</label>
+                        <input id="email" name="email" type="email" class="form-control"
+                               placeholder="you@example.com" autocomplete="email" required>
+                    </div>
 
-					<button type="submit">Log In</button>
-				</form>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input id="password" name="password" type="password" class="form-control"
+                               placeholder="Enter password" autocomplete="current-password" required>
+                    </div>
 
-				<p class="signup-note">
-					New here? <a href="{{ url_for('signup') }}">Create an account</a>
-				</p>
-			</div>
-		</section>
-	</main>
+                    <div class="check-row mb-1">
+                        <div class="form-check">
+                            <input class="form-check-input" id="remember" type="checkbox" name="remember">
+                            <label class="form-check-label" for="remember">Remember me</label>
+                        </div>
+                        <a href="#">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login">Log In</button>
+                </form>
+
+                <p class="signup-note">
+                    New here? <a href="{{ url_for('signup') }}">Create an account</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
