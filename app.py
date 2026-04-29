@@ -14,6 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "dev-secret-key-change-me"
 
+app.config["SECRET_KEY"] = "dev-secret-key"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///moviehub.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -23,6 +24,7 @@ db = SQLAlchemy(app)
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
 
@@ -66,17 +68,6 @@ def home():
 @app.route("/about")
 def about():
     return render_template("about.html")
-
-@app.route("/profile")
-@login_required
-def profile():
-    return render_template("profile.html")
-
-@app.route("/diary")
-@login_required
-def diary():
-    return render_template("diary.html")
-
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -123,11 +114,25 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/profile")
+@login_required
+def profile():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user = User.query.get(session["user_id"])
+    return render_template("profile.html", user=user)
+
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("home"))
+
+@app.route("/diary")
+@login_required
+def diary():
+    return render_template("diary.html")
 
 if __name__ == "__main__":
     with app.app_context():

@@ -10,7 +10,6 @@
 <div class="login-wrap">
     <div class="row g-3 align-items-stretch">
 
-        <!-- Brand panel -->
         <div class="col-12 col-md-6">
             <div class="brand-panel">
                 <p class="eyebrow">Create account</p>
@@ -26,14 +25,13 @@
             </div>
         </div>
 
-        <!-- Form panel -->
         <div class="col-12 col-md-6">
             <div class="form-card">
                 <p class="back-home"><a href="{{ url_for('home') }}">← Back to Home</a></p>
                 <h2>Sign up</h2>
                 <p class="form-subtitle">Create your account to continue.</p>
 
-                <form method="post" action="/signup">
+                <form method="POST" action="{{ url_for('signup') }}">
                     <div class="mb-2">
                         <label for="username" class="form-label">Username</label>
                         <input id="username" name="username" type="text" class="form-control"
