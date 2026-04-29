@@ -24,7 +24,6 @@ db = SQLAlchemy(app)
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
 
@@ -113,15 +112,10 @@ def login():
 
     return render_template("login.html")
 
-
 @app.route("/profile")
 @login_required
 def profile():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    user = User.query.get(session["user_id"])
-    return render_template("profile.html", user=user)
+    return render_template("profile.html", user=current_user)
 
 @app.route("/logout")
 @login_required
