@@ -44,6 +44,26 @@ body {
     color: var(--primary) !important;
 }
 
+.auth-separator {
+    border-left: 1px solid rgba(82, 96, 109, 0.18);
+}
+
+.logout-link {
+    border: 1px solid rgba(47, 111, 159, 0.18);
+    background: rgba(47, 111, 159, 0.05);
+    color: #4a5568 !important;
+    border-radius: 12px;
+    padding: 0.35rem 0.75rem !important;
+    font-weight: 500;
+}
+
+.logout-link:hover,
+.logout-link:focus {
+    background: rgba(47, 111, 159, 0.09);
+    color: var(--text) !important;
+    border-color: rgba(47, 111, 159, 0.28);
+}
+
 /* ── Hero (index) ── */
 .hero-section {
     background: var(--panel);
