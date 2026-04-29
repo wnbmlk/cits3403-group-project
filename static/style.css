@@ -66,9 +66,12 @@ body {
 
 /* ── Hero (index) ── */
 .hero-section {
-    background: var(--panel);
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.62)),
+        url("/static/homepage.jpg") center/cover no-repeat;
     border-bottom: 1px solid var(--border);
     padding: 90px 0;
+    color: #ffffff;
 }
 
 .hero-section h1 {
@@ -78,7 +81,7 @@ body {
 }
 
 .hero-section .desc {
-    color: var(--muted);
+    color: #e5e7eb;
     margin-top: 0.5rem;
 }
 
