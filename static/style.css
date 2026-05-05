@@ -26,7 +26,10 @@ body {
 /* ── Navbar ── */
 .navbar {
     border-bottom: 1px solid var(--border);
-    background: var(--panel);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(6px);
+    position: relative;
+    z-index: 10;
 }
 
 .navbar-brand {
@@ -37,6 +40,7 @@ body {
 
 .nav-link {
     color: var(--text) !important;
+    font-weight: 500;
 }
 
 .nav-link:hover,
@@ -64,7 +68,7 @@ body {
     border-color: rgba(47, 111, 159, 0.28);
 }
 
-/* ── Hero (index) ── */
+/* ── Hero ── */
 .hero-section {
     background:
         linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.62)),
@@ -113,7 +117,7 @@ body {
     color: #fff;
 }
 
-/* ── Movie cards (index) ── */
+/* ── Movie cards ── */
 .diary-section {
     padding: 70px 0;
 }
