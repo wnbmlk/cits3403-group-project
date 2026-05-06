@@ -1,55 +1,3 @@
-const catalog = [
-    {
-        title: "Parasite",
-        status: "Watched",
-        year: "2019",
-        poster: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
-    },
-    {
-        title: "Interstellar",
-        status: "Want to watch",
-        year: "2014",
-        poster: "https://image.tmdb.org/t/p/w342/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-    },
-    {
-        title: "The Dark Knight",
-        status: "Favourite",
-        year: "2008",
-        poster: "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
-    },
-    {
-        title: "Inception",
-        status: "Watched",
-        year: "2010",
-        poster: "https://image.tmdb.org/t/p/w342/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
-    },
-    {
-        title: "The Lord of the Rings",
-        status: "Watchlist",
-        year: "2001",
-        poster: "https://image.tmdb.org/t/p/w342/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
-    },
-    {
-        title: "Oppenheimer",
-        status: "Watchlist",
-        year: "2023",
-        poster: "https://image.tmdb.org/t/p/w342/ptpr0kGAckfQkJeJIt8st5dglvd.jpg",
-    },
-    {
-        title: "Dune: Part Two",
-        status: "Watched",
-        year: "2024",
-        poster: "https://image.tmdb.org/t/p/w342/6izwzX3K8mLrZQ9y3FMhFjJw3k.jpg",
-    },
-    {
-        title: "Severance",
-        status: "Watching",
-        year: "2022",
-        poster: "https://image.tmdb.org/t/p/w342/mbXQb9Q0mVfM6R1nF8l6HfBq0d8.jpg",
-    },
-];
-
-const storageKey = "movieDiaryTimeline";
 const timelineTrack = document.getElementById("timelineTrack");
 const movieModal = document.getElementById("movieModal");
 const closeMovieModal = document.getElementById("closeMovieModal");
@@ -63,6 +11,58 @@ const watchedDateRange = document.getElementById("watchedDateRange");
 const clearWatchedRange = document.getElementById("clearWatchedRange");
 
 let watchedRangePicker = null;
+let timelineEntries = [];
+
+const catalog = [
+    {
+        title: "Parasite",
+        status: "Watched",
+        genre: "Drama • Thriller",
+        poster: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
+    },
+    {
+        title: "Interstellar",
+        status: "Want to watch",
+        genre: "Sci-Fi • Drama",
+        poster: "https://image.tmdb.org/t/p/w342/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    },
+    {
+        title: "The Dark Knight",
+        status: "Favourite",
+        genre: "Action • Thriller",
+        poster: "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
+    },
+    {
+        title: "Inception",
+        status: "Watched",
+        genre: "Sci-Fi • Thriller",
+        poster: "https://image.tmdb.org/t/p/w342/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+    },
+    {
+        title: "The Lord of the Rings",
+        status: "Watchlist",
+        genre: "Fantasy • Adventure",
+        poster: "https://image.tmdb.org/t/p/w342/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
+    },
+    {
+        title: "Oppenheimer",
+        status: "Watchlist",
+        genre: "Drama • Biography",
+        poster: "https://image.tmdb.org/t/p/w342/ptpr0kGAckfQkJeJIt8st5dglvd.jpg",
+    },
+    {
+        title: "Dune: Part Two",
+        status: "Watched",
+        genre: "Sci-Fi • Action",
+        poster: "https://image.tmdb.org/t/p/w342/6izwzX3K8mLrZQ9y3FMhFjJw3k.jpg",
+    },
+    {
+        title: "Severance",
+        status: "Watching",
+        genre: "Mystery • Drama",
+        poster: "https://image.tmdb.org/t/p/w342/mbXQb9Q0mVfM6R1nF8l6HfBq0d8.jpg",
+    },
+];
 
 const filterState = {
     category: "all",
@@ -79,105 +79,115 @@ function slugify(text) {
 }
 
 function parseLegacyDateISO(item) {
-    if (item.dateISO) {
-        return item.dateISO;
-    }
-
     if (item.date) {
-        const datePart = item.date.split("•")[0].trim();
-        const parsed = new Date(datePart);
-        if (!Number.isNaN(parsed.getTime())) {
-            return parsed.toISOString().slice(0, 10);
-        }
-    }
-
-    if (item.year) {
-        return `${item.year}-01-01`;
+        try {
+            const date = new Date(item.date);
+            if (!Number.isNaN(date.getTime())) {
+                return date.toISOString().slice(0, 10);
+            }
+        } catch (e) {}
     }
 
     return new Date().toISOString().slice(0, 10);
 }
 
-function createStableId(item) {
-    const titlePart = slugify(item.title);
-    const datePart = (item.dateISO || parseLegacyDateISO(item)).replace(/[^0-9]/g, "");
-    const statusPart = slugify(item.status);
-    return `movie-${titlePart}-${statusPart}-${datePart}`;
-}
-
-function getTimelineItems() {
+async function fetchTimelineEntries() {
     try {
-        const saved = JSON.parse(localStorage.getItem(storageKey));
-        if (Array.isArray(saved)) {
-            const normalized = saved.map(normalizeTimelineItem);
-            if (JSON.stringify(saved) !== JSON.stringify(normalized)) {
-                saveTimelineItems(normalized);
-            }
-            return normalized;
+        const response = await fetch("/api/diary/entries", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch diary entries");
         }
+
+        const data = await response.json();
+        timelineEntries = (data.entries || []).map((entry) => ({
+            id: entry.id,
+            title: entry.title,
+            status: entry.status,
+            genre: entry.genre || "",
+            date: new Date(entry.date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+            }),
+            dateISO: entry.date.split("T")[0],
+            poster: null,
+        }));
+        return timelineEntries;
     } catch (error) {
-        console.warn("Could not load saved timeline", error);
+        console.error("Error fetching diary entries:", error);
+        timelineEntries = [];
+        return [];
     }
-
-    return [
-        {
-            id: "seed-1",
-            title: "Parasite",
-            status: "Watched",
-            year: "2026",
-            date: "Apr 02, 2024 • 20:10",
-            dateISO: "2024-04-02",
-            poster: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
-        },
-        {
-            id: "seed-2",
-            title: "Interstellar",
-            status: "Rewatch",
-            year: "2026",
-            date: "Apr 05, 2024 • 22:00",
-            dateISO: "2024-04-05",
-            poster: "https://image.tmdb.org/t/p/w342/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-        },
-        {
-            id: "seed-3",
-            title: "The Dark Knight",
-            status: "Favourite",
-            year: "2026",
-            date: "Apr 09, 2025 • 19:30",
-            dateISO: "2025-04-09",
-            poster: "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
-        },
-        {
-            id: "seed-4",
-            title: "Dune: Part Two",
-            status: "Watched",
-            year: "2024",
-            date: "Feb 20, 2025 • 18:15",
-            dateISO: "2025-02-20",
-            poster: "https://image.tmdb.org/t/p/w342/6izwzX3K8mLrZQ9y3FMhFjJw3k.jpg",
-        },
-    ];
 }
 
-function normalizeTimelineItem(item) {
-    const dateISO = parseLegacyDateISO(item);
-    return {
-        id: item.id || createStableId(item),
-        title: item.title,
-        status: item.status,
-        year: item.year,
-        date: item.date,
-        dateISO,
-        poster: item.poster,
-    };
+async function saveTimelineEntry(title, status, genre, date) {
+    try {
+        const response = await fetch("/api/diary/entries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                title,
+                status,
+                genre,
+                date: date + "T00:00:00Z",
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to save diary entry");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error saving diary entry:", error);
+        return null;
+    }
 }
 
-function getStoreItems() {
-    return getTimelineItems().map(normalizeTimelineItem);
+async function updateTimelineEntry(id, title, status, genre, date) {
+    try {
+        const response = await fetch(`/api/diary/entries/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                title,
+                status,
+                genre,
+                date: date + "T00:00:00Z",
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to update diary entry");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating diary entry:", error);
+        return null;
+    }
 }
 
-function saveTimelineItems(items) {
-    localStorage.setItem(storageKey, JSON.stringify(items));
+async function removeTimelineEntry(id) {
+    try {
+        const response = await fetch(`/api/diary/entries/${id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete diary entry");
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error deleting diary entry:", error);
+        return false;
+    }
 }
 
 function isWatched(item) {
@@ -231,10 +241,10 @@ function matchesRange(item) {
 }
 
 function getVisibleItems() {
-    return getStoreItems().filter((item) => matchesCategory(item) && matchesRange(item));
+    return timelineEntries.filter((item) => matchesCategory(item) && matchesRange(item));
 }
 
-function renderTimeline() {
+async function renderTimeline() {
     const items = getVisibleItems();
     timelineTrack.innerHTML = "";
 
@@ -256,10 +266,10 @@ function renderTimeline() {
 
         article.dataset.id = item.id;
         timeStamp.textContent = item.date || "New entry";
-        image.src = item.poster;
+        image.src = item.poster || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='225'%3E%3Crect width='150' height='225' fill='%23ddd'/%3E%3Ctext x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='12'%3ENo poster%3C/text%3E%3C/svg%3E";
         image.alt = `${item.title} poster`;
         title.textContent = item.title;
-        status.textContent = `${item.status}${item.year ? ` • ${item.year}` : ""}`;
+        status.textContent = `${item.status}${item.genre ? ` • ${item.genre}` : ""}`;
         removeButton.addEventListener("click", () => removeMovieFromTimeline(item.id));
 
         timelineTrack.appendChild(movieNode);
@@ -298,7 +308,7 @@ function renderResults(results) {
             <img src="${movie.poster}" alt="${movie.title} poster">
             <div>
                 <h3>${movie.title}</h3>
-                <p>${movie.status} • ${movie.year}</p>
+                <p>${movie.status}${movie.genre ? ` • ${movie.genre}` : ""}</p>
             </div>
         `;
         button.addEventListener("click", () => addMovieToTimeline(movie));
@@ -306,39 +316,31 @@ function renderResults(results) {
     });
 }
 
-function addMovieToTimeline(movie) {
-    const items = getStoreItems();
+async function addMovieToTimeline(movie) {
     const now = new Date();
-    const dateLabel = now.toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-    });
-    const timeLabel = now.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-    });
+    const dateISO = now.toISOString().split("T")[0];
+    const status = movie.status || "Watched";
 
-    items.push({
-        id: createStableId({ title: movie.title, status: movie.status, dateISO: now.toISOString().slice(0, 10) }),
-        title: movie.title,
-        status: movie.status,
-        year: movie.year,
-        date: `${dateLabel} • ${timeLabel}`,
-        dateISO: now.toISOString().slice(0, 10),
-        poster: movie.poster,
-    });
+    const entry = await saveTimelineEntry(
+        movie.title,
+        status,
+        movie.genre || "",
+        dateISO
+    );
 
-    saveTimelineItems(items);
-    renderTimeline();
-    closeModal();
+    if (entry) {
+        await fetchTimelineEntries();
+        await renderTimeline();
+        closeModal();
+    }
 }
 
-function removeMovieFromTimeline(id) {
-    const items = getStoreItems().filter((item) => item.id !== id);
-    saveTimelineItems(items);
-    renderTimeline();
+async function removeMovieFromTimeline(id) {
+    const success = await removeTimelineEntry(id);
+    if (success) {
+        await fetchTimelineEntries();
+        await renderTimeline();
+    }
 }
 
 function setActiveButton(buttons, activeValue, dataKey) {
@@ -367,7 +369,6 @@ function initializeRangePicker() {
                 filterState.category = "watched";
                 setActiveButton(categoryButtons, "watched", "category");
                 syncRangeControls();
-                renderTimeline();
             }
         },
         onChange(selectedDates) {
@@ -378,7 +379,6 @@ function initializeRangePicker() {
                 filterState.dateTo = selectedDates[1].toISOString().slice(0, 10);
                 setActiveButton(categoryButtons, "watched", "category");
                 syncRangeControls();
-                renderTimeline();
             }
         },
     });
@@ -397,14 +397,14 @@ function syncRangeControls() {
 }
 
 categoryButtons.forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
         filterState.category = button.dataset.category;
         setActiveButton(categoryButtons, filterState.category, "category");
-        renderTimeline();
+        await renderTimeline();
     });
 });
 
-watchedRangeToggle.addEventListener("change", () => {
+watchedRangeToggle.addEventListener("change", async () => {
     filterState.useCustomRange = watchedRangeToggle.checked;
     filterState.category = "watched";
     if (!filterState.useCustomRange) {
@@ -413,15 +413,15 @@ watchedRangeToggle.addEventListener("change", () => {
     }
     setActiveButton(categoryButtons, "watched", "category");
     syncRangeControls();
-    renderTimeline();
+    await renderTimeline();
 });
 
-clearWatchedRange.addEventListener("click", () => {
+clearWatchedRange.addEventListener("click", async () => {
     filterState.useCustomRange = false;
     filterState.dateFrom = "";
     filterState.dateTo = "";
     syncRangeControls();
-    renderTimeline();
+    await renderTimeline();
 });
 
 movieSearch.addEventListener("input", () => {
@@ -445,4 +445,9 @@ document.addEventListener("keydown", (event) => {
 
 initializeRangePicker();
 syncRangeControls();
-renderTimeline();
+
+// Initialize the diary page
+(async () => {
+    await fetchTimelineEntries();
+    await renderTimeline();
+})();

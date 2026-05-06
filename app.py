@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -11,6 +12,7 @@ from flask_login import (
     login_required,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_migrate import Migrate
 
 
 def load_env_file(env_path):
@@ -61,6 +63,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class User(UserMixin, db.Model):
@@ -83,6 +86,30 @@ class Review(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     movie_id = db.Column(db.Integer, db.ForeignKey("movie.id"), nullable=False)
+
+
+class DiaryEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    status = db.Column(db.String(50), nullable=False)
+    genre = db.Column(db.String(100), nullable=True)
+    date = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "status": self.status,
+            "genre": self.genre,
+            "date": self.date.isoformat(),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "user_id": self.user_id
+        }
 
 
 # Flask-Login setup
@@ -233,6 +260,91 @@ def logout():
 @login_required
 def diary():
     return render_template("diary.html")
+
+
+@app.route("/api/diary/entries", methods=["GET"])
+@login_required
+def get_diary_entries():
+    """Get all diary entries for the current user"""
+    entries = DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date.desc()).all()
+    return {"entries": [entry.to_dict() for entry in entries]}
+
+
+@app.route("/api/diary/entries", methods=["POST"])
+@login_required
+def create_diary_entry():
+    """Create a new diary entry for the current user"""
+    data = request.get_json()
+    
+    if not data or "title" not in data or "status" not in data or "date" not in data:
+        return {"error": "Missing required fields"}, 400
+    
+    try:
+        date = datetime.fromisoformat(data["date"].replace("Z", "+00:00"))
+    except (ValueError, AttributeError):
+        return {"error": "Invalid date format"}, 400
+    
+    entry = DiaryEntry(
+        title=data["title"],
+        status=data["status"],
+        genre=data.get("genre"),
+        date=date,
+        user_id=current_user.id
+    )
+    
+    db.session.add(entry)
+    db.session.commit()
+    
+    return entry.to_dict(), 201
+
+
+@app.route("/api/diary/entries/<int:entry_id>", methods=["PUT"])
+@login_required
+def update_diary_entry(entry_id):
+    """Update a diary entry"""
+    entry = DiaryEntry.query.get(entry_id)
+    
+    if not entry:
+        return {"error": "Entry not found"}, 404
+    
+    if entry.user_id != current_user.id:
+        return {"error": "Forbidden"}, 403
+    
+    data = request.get_json()
+    
+    if "title" in data:
+        entry.title = data["title"]
+    if "status" in data:
+        entry.status = data["status"]
+    if "genre" in data:
+        entry.genre = data["genre"]
+    if "date" in data:
+        try:
+            entry.date = datetime.fromisoformat(data["date"].replace("Z", "+00:00"))
+        except (ValueError, AttributeError):
+            return {"error": "Invalid date format"}, 400
+    
+    db.session.commit()
+    return entry.to_dict()
+
+
+@app.route("/api/diary/entries/<int:entry_id>", methods=["DELETE"])
+@login_required
+def delete_diary_entry(entry_id):
+    """Delete a diary entry"""
+    entry = DiaryEntry.query.get(entry_id)
+    
+    if not entry:
+        return {"error": "Entry not found"}, 404
+    
+    if entry.user_id != current_user.id:
+        return {"error": "Forbidden"}, 403
+    
+    db.session.delete(entry)
+    db.session.commit()
+    
+    return {"success": True}
+
 
 if __name__ == "__main__":
     os.makedirs(app.instance_path, exist_ok=True)
