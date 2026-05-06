@@ -42,10 +42,123 @@
                         <label for="password" class="form-label">Password</label>
                         <input id="password" name="password" type="password" class="form-control"
                                placeholder="Create password" required>
+                        
+                        <!-- Password Strength Meter -->
+                        <div class="password-strength-container mt-2">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <p class="strength-text" id="strengthText">Password strength: Weak</p>
+                        </div>
+
+                        <!-- Requirements Checklist -->
+                        <div class="password-requirements mt-3">
+                            <p class="requirements-title">Password requirements:</p>
+                            <ul class="requirements-list">
+                                <li id="req-length" class="requirement unmet">
+                                    <span class="requirement-icon">✗</span>
+                                    At least 8 characters
+                                </li>
+                                <li id="req-uppercase" class="requirement unmet">
+                                    <span class="requirement-icon">✗</span>
+                                    One uppercase letter (A-Z)
+                                </li>
+                                <li id="req-lowercase" class="requirement unmet">
+                                    <span class="requirement-icon">✗</span>
+                                    One lowercase letter (a-z)
+                                </li>
+                                <li id="req-number" class="requirement unmet">
+                                    <span class="requirement-icon">✗</span>
+                                    One number (0-9)
+                                </li>
+                                <li id="req-special" class="requirement unmet">
+                                    <span class="requirement-icon">✗</span>
+                                    One special character (!@#$%^&*)
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn-signup">Create Account</button>
+                    <button type="submit" class="btn-signup" id="submitBtn" disabled>Create Account</button>
                 </form>
+
+                <script>
+                    const passwordInput = document.getElementById('password');
+                    const strengthFill = document.getElementById('strengthFill');
+                    const strengthText = document.getElementById('strengthText');
+                    const submitBtn = document.getElementById('submitBtn');
+
+                    const requirements = {
+                        length: document.getElementById('req-length'),
+                        uppercase: document.getElementById('req-uppercase'),
+                        lowercase: document.getElementById('req-lowercase'),
+                        number: document.getElementById('req-number'),
+                        special: document.getElementById('req-special')
+                    };
+
+                    passwordInput.addEventListener('input', async function() {
+                        const password = this.value;
+
+                        try {
+                            const response = await fetch('/api/password-strength', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ password: password })
+                            });
+
+                            const data = await response.json();
+                            const score = data.score;
+                            const reqs = data.requirements;
+
+                            // Update strength meter
+                            strengthFill.style.width = (score * 20) + '%';
+                            
+                            if (score === 0) {
+                                strengthFill.className = 'strength-fill';
+                                strengthText.textContent = 'Password strength: Weak';
+                            } else if (score <= 2) {
+                                strengthFill.className = 'strength-fill weak';
+                                strengthText.textContent = 'Password strength: Weak';
+                            } else if (score === 3) {
+                                strengthFill.className = 'strength-fill fair';
+                                strengthText.textContent = 'Password strength: Fair';
+                            } else if (score === 4) {
+                                strengthFill.className = 'strength-fill good';
+                                strengthText.textContent = 'Password strength: Good';
+                            } else {
+                                strengthFill.className = 'strength-fill strong';
+                                strengthText.textContent = 'Password strength: Strong';
+                            }
+
+                            // Update requirements checklist
+                            updateRequirement('length', reqs.length);
+                            updateRequirement('uppercase', reqs.uppercase);
+                            updateRequirement('lowercase', reqs.lowercase);
+                            updateRequirement('number', reqs.number);
+                            updateRequirement('special', reqs.special);
+
+                            // Enable/disable submit button
+                            submitBtn.disabled = !data.valid;
+                        } catch (error) {
+                            console.error('Error checking password:', error);
+                        }
+                    });
+
+                    function updateRequirement(name, met) {
+                        const elem = requirements[name];
+                        if (met) {
+                            elem.classList.remove('unmet');
+                            elem.classList.add('met');
+                            elem.querySelector('.requirement-icon').textContent = '✓';
+                        } else {
+                            elem.classList.remove('met');
+                            elem.classList.add('unmet');
+                            elem.querySelector('.requirement-icon').textContent = '✗';
+                        }
+                    }
+                </script>
 
                 <p class="signup-note">
                     Already have an account? <a href="{{ url_for('login') }}">Log in</a>

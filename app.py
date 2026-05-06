@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -11,11 +13,51 @@ from flask_login import (
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-app = Flask(__name__)
-app.secret_key = "dev-secret-key-change-me"
+def load_env_file(env_path):
+    if not os.path.exists(env_path):
+        return
 
-app.config["SECRET_KEY"] = "dev-secret-key"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///moviehub.db"
+    with open(env_path, encoding="utf-8") as env_file:
+        for line in env_file:
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+
+            key, value = stripped.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
+load_env_file(os.path.join(os.path.dirname(__file__), ".env"))
+
+app = Flask(__name__)
+
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+
+
+def get_database_uri():
+    database_uri = os.environ.get("DATABASE_URL") or os.environ.get("SQLALCHEMY_DATABASE_URI")
+    if database_uri and database_uri.startswith("postgres://"):
+        return database_uri.replace("postgres://", "postgresql://", 1)
+
+    if database_uri and database_uri.startswith("sqlite:///"):
+        sqlite_path = database_uri.replace("sqlite:///", "", 1)
+        if not os.path.isabs(sqlite_path):
+            sqlite_path = os.path.join(os.path.dirname(__file__), sqlite_path)
+        os.makedirs(os.path.dirname(sqlite_path), exist_ok=True)
+        return f"sqlite:///{sqlite_path}"
+
+    if database_uri:
+        return database_uri
+
+    database_path = os.path.join(os.path.dirname(__file__), "instance", "moviehub.db")
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
+    return f"sqlite:///{database_path}"
+
+
+app.config["SQLALCHEMY_DATABASE_URI"] = get_database_uri()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -60,6 +102,30 @@ def unauthorized():
     flash("Please log in to access the diary and profile pages.", "warning")
     return redirect(url_for("login"))
 
+
+def validate_password(password):
+    """
+    Validate password strength.
+    Returns a tuple: (is_valid, error_message)
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+
+    if not any(c.isupper() for c in password):
+        return False, "Password must contain at least one uppercase letter"
+
+    if not any(c.islower() for c in password):
+        return False, "Password must contain at least one lowercase letter"
+
+    if not any(c.isdigit() for c in password):
+        return False, "Password must contain at least one number"
+
+    special_chars = "!@#$%^&*()-_=+[]{};:'\",.< >?/\\|`~"
+    if not any(c in special_chars for c in password):
+        return False, "Password must contain at least one special character (!@#$%^&* etc.)"
+
+    return True, None
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -67,6 +133,41 @@ def home():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+@app.route("/api/password-strength", methods=["POST"])
+def check_password_strength():
+    """API endpoint for real-time password strength checking"""
+    data = request.get_json()
+    password = data.get("password", "")
+
+    is_valid, error_msg = validate_password(password)
+
+    strength_score = 0
+    if len(password) >= 8:
+        strength_score += 1
+    if any(c.isupper() for c in password):
+        strength_score += 1
+    if any(c.islower() for c in password):
+        strength_score += 1
+    if any(c.isdigit() for c in password):
+        strength_score += 1
+
+    special_chars = "!@#$%^&*()-_=+[]{};:'\",.< >?/\\|`~"
+    if any(c in special_chars for c in password):
+        strength_score += 1
+
+    return {
+        "valid": is_valid,
+        "score": strength_score,
+        "error": error_msg,
+        "requirements": {
+            "length": len(password) >= 8,
+            "uppercase": any(c.isupper() for c in password),
+            "lowercase": any(c.islower() for c in password),
+            "number": any(c.isdigit() for c in password),
+            "special": any(c in special_chars for c in password),
+        }
+    }
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -76,6 +177,11 @@ def signup():
 
         if not username or not password:
             flash("Username and password required", "danger")
+            return redirect(url_for("signup"))
+
+        is_valid, error_msg = validate_password(password)
+        if not is_valid:
+            flash(error_msg, "danger")
             return redirect(url_for("signup"))
 
         existing = User.query.filter_by(username=username).first()
@@ -129,6 +235,7 @@ def diary():
     return render_template("diary.html")
 
 if __name__ == "__main__":
+    os.makedirs(app.instance_path, exist_ok=True)
     with app.app_context():
         db.create_all()
     app.run(debug=True)

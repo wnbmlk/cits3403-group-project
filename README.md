@@ -41,3 +41,12 @@ The application lets users log in, save the movies and series they have watched,
 - CSS
 - JavaScript
 - Flask
+
+## Environment Variables
+
+Create a local `.env` file based on `.env.example` and keep it out of Git.
+
+- `SECRET_KEY`: Flask session secret, used for signed cookies and flash/session security.
+- `DATABASE_URL`: Database connection string. For local development, use `sqlite:///instance/moviehub.db`. For a shared database, point this to a hosted PostgreSQL URL.
+
+Passwords are hashed with Werkzeug before storage. The secret key is not used to store or recover passwords.
