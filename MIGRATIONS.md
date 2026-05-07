@@ -7,7 +7,7 @@ Quick commands (development)
 1. Set the Flask app environment variable
 
 ```bash
-export FLASK_APP=app.py
+export FLASK_APP=run.py
 ```
 
 2. Initialize migrations (only once)
@@ -49,7 +49,7 @@ Notes
 Examples (one-line)
 
 ```bash
-export FLASK_APP=app.py && ./.venv/bin/flask db migrate -m "add field to User" && ./.venv/bin/flask db upgrade
+export FLASK_APP=run.py && ./.venv/bin/flask db migrate -m "add field to User" && ./.venv/bin/flask db upgrade
 ```
 
 That's it — migrations record schema changes while your database file remains local and out of Git.
