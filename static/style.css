@@ -228,3 +228,123 @@ footer {
     padding: 20px;
     text-align: center;
 }
+
+/* ── Password Strength Meter ── */
+.password-strength-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.strength-bar {
+    width: 100%;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0;
+    background: #ef4444;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-fill.weak {
+    background: #ef4444;
+}
+
+.strength-fill.fair {
+    background: #f97316;
+}
+
+.strength-fill.good {
+    background: #eab308;
+}
+
+.strength-fill.strong {
+    background: #22c55e;
+}
+
+.strength-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin: 0;
+}
+
+/* ── Password Requirements ── */
+.password-requirements {
+    background: rgba(79, 70, 229, 0.05);
+    border: 1px solid rgba(79, 70, 229, 0.15);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.requirements-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+}
+
+.requirements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.requirement {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    transition: color 0.2s ease;
+}
+
+.requirement-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #9ca3af;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.requirement.unmet .requirement-icon {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.requirement.met {
+    color: #059669;
+}
+
+.requirement.met .requirement-icon {
+    background: #d1fae5;
+    color: #059669;
+}
+
+/* ── Signup Button ── */
+#submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#submitBtn:enabled {
+    cursor: pointer;
+}

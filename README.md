@@ -41,3 +41,38 @@ The application lets users log in, save the movies and series they have watched,
 - CSS
 - JavaScript
 - Flask
+
+## Environment Variables
+
+Create a local `.env` file based on `.env.example` and keep it out of Git.
+
+- `SECRET_KEY`: Flask session secret, used for signed cookies and flash/session security.
+- `DATABASE_URL`: Database connection string. For local development, use `sqlite:///instance/moviehub.db`. For a shared database, point this to a hosted PostgreSQL URL.
+
+Passwords are hashed with Werkzeug before storage. The secret key is not used to store or recover passwords.
+
+## Run Locally
+
+1. Activate the virtual environment.
+
+```bash
+source .venv/bin/activate
+```
+
+2. Set the Flask app entrypoint to the new launcher.
+
+```bash
+export FLASK_APP=run.py
+```
+
+3. Run the development server.
+
+```bash
+./.venv/bin/flask run
+```
+
+If you need to create or update the local database schema, run migrations with the same entrypoint:
+
+```bash
+export FLASK_APP=run.py && ./.venv/bin/flask db migrate -m "describe changes" && ./.venv/bin/flask db upgrade
+```
