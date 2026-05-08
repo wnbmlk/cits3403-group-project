@@ -46,6 +46,7 @@ class DiaryEntry(db.Model):
     genre = db.Column(db.String(100), nullable=True)
     poster_path = db.Column(db.String(255), nullable=True)
     date = db.Column(db.DateTime, nullable=False)
+    date_watched_end = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -59,6 +60,7 @@ class DiaryEntry(db.Model):
             "genre": self.genre,
             "poster_path": self.poster_path,
             "date": self.date.isoformat(),
+            "date_watched_end": self.date_watched_end.isoformat() if self.date_watched_end else None,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "user_id": self.user_id,
