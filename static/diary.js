@@ -3,6 +3,10 @@ const movieModal = document.getElementById("movieModal");
 const closeMovieModal = document.getElementById("closeMovieModal");
 const movieSearch = document.getElementById("movieSearch");
 const searchResults = document.getElementById("searchResults");
+const statusPrompt = document.getElementById("statusPrompt");
+const statusPromptMovieTitle = document.getElementById("statusPromptMovieTitle");
+const confirmAddMovie = document.getElementById("confirmAddMovie");
+const cancelStatusPrompt = document.getElementById("cancelStatusPrompt");
 const movieTemplate = document.getElementById("timelineMovieTemplate");
 const addTemplate = document.getElementById("timelineAddTemplate");
 const categoryButtons = document.querySelectorAll("[data-category]");
@@ -13,6 +17,7 @@ const movieCatalogData = document.getElementById("movie-catalog-data");
 
 let watchedRangePicker = null;
 let timelineEntries = [];
+let pendingMovie = null;
 
 function loadCatalog() {
     if (!movieCatalogData) {
@@ -29,7 +34,6 @@ function loadCatalog() {
 
 const catalog = loadCatalog().map((movie) => ({
     title: movie.title,
-    status: movie.status || "Watched",
     genre: movie.genre || "",
     poster: movie.poster_path || "/static/images/posters/placeholder.svg",
 }));
@@ -256,11 +260,15 @@ async function renderTimeline() {
 function openModal() {
     movieModal.hidden = false;
     movieSearch.value = "";
+    pendingMovie = null;
+    hideStatusPrompt();
     renderResults(catalog);
     movieSearch.focus();
 }
 
 function closeModal() {
+    pendingMovie = null;
+    hideStatusPrompt();
     movieModal.hidden = true;
 }
 
@@ -280,25 +288,77 @@ function renderResults(results) {
             <img src="${movie.poster}" alt="${movie.title} poster">
             <div>
                 <h3>${movie.title}</h3>
-                <p>${movie.status}${movie.genre ? ` • ${movie.genre}` : ""}</p>
+                <p>${movie.genre || "Genre not set"}</p>
             </div>
         `;
-        button.addEventListener("click", () => addMovieToTimeline(movie));
+        button.addEventListener("click", () => addMovieToTimeline(movie, button));
         searchResults.appendChild(button);
     });
 }
 
-async function addMovieToTimeline(movie) {
+function getSelectedStatuses() {
+    const selected = Array.from(document.querySelectorAll(".status-checkbox:checked")).map(
+        (checkbox) => checkbox.value
+    );
+    return selected;
+}
+
+function resetStatusCheckboxes() {
+    document.querySelectorAll(".status-checkbox").forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+}
+
+function showStatusPrompt(movie, selectedButton) {
+    pendingMovie = movie;
+    if (statusPromptMovieTitle) {
+        statusPromptMovieTitle.textContent = movie.title;
+    }
+    resetStatusCheckboxes();
+    const watchedCheckbox = document.querySelector('.status-checkbox[value="Watched"]');
+    if (watchedCheckbox) {
+        watchedCheckbox.checked = true;
+    }
+    if (statusPrompt && selectedButton) {
+        selectedButton.insertAdjacentElement("afterend", statusPrompt);
+        statusPrompt.hidden = false;
+        statusPrompt.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        watchedCheckbox?.focus();
+    }
+}
+
+function hideStatusPrompt() {
+    if (statusPrompt) {
+        statusPrompt.hidden = true;
+    }
+    resetStatusCheckboxes();
+}
+
+async function addMovieToTimeline(movie, selectedButton) {
+    showStatusPrompt(movie, selectedButton);
+}
+
+async function confirmAddMovieToTimeline() {
+    if (!pendingMovie) {
+        return;
+    }
+
+    const selectedStatuses = getSelectedStatuses();
+    if (selectedStatuses.length === 0) {
+        alert("Please choose at least one status.");
+        return;
+    }
+
     const now = new Date();
     const dateISO = now.toISOString().split("T")[0];
-    const status = movie.status || "Watched";
+    const status = selectedStatuses.join(", ");
 
     const entry = await saveTimelineEntry(
-        movie.title,
+        pendingMovie.title,
         status,
-        movie.genre || "",
+        pendingMovie.genre || "",
         dateISO,
-        movie.poster || null
+        pendingMovie.poster || null
     );
 
     if (entry) {
@@ -398,10 +458,23 @@ clearWatchedRange.addEventListener("click", async () => {
 });
 
 movieSearch.addEventListener("input", () => {
+    pendingMovie = null;
+    hideStatusPrompt();
     const term = movieSearch.value.trim().toLowerCase();
     const filtered = catalog.filter((movie) => movie.title.toLowerCase().includes(term));
     renderResults(filtered);
 });
+
+if (confirmAddMovie) {
+    confirmAddMovie.addEventListener("click", confirmAddMovieToTimeline);
+}
+
+if (cancelStatusPrompt) {
+    cancelStatusPrompt.addEventListener("click", () => {
+        pendingMovie = null;
+        hideStatusPrompt();
+    });
+}
 
 closeMovieModal.addEventListener("click", closeModal);
 movieModal.addEventListener("click", (event) => {
