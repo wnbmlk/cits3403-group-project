@@ -1,0 +1,13 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='150' height='225' viewBox='0 0 150 225'>
+  <defs>
+    <linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='hsl(186, 45%, 18%)'/>
+      <stop offset='100%' stop-color='hsl(162, 70%, 55%)'/>
+    </linearGradient>
+  </defs>
+  <rect width='150' height='225' rx='16' fill='url(#bg)'/>
+  <rect x='12' y='12' width='126' height='201' rx='12' fill='rgba(255,255,255,0.08)' stroke='rgba(255,255,255,0.18)'/>
+  <text x='75' y='92' text-anchor='middle' fill='white' font-family='Arial, sans-serif' font-size='14' font-weight='700'>Titanic</text>
+  <text x='75' y='122' text-anchor='middle' fill='rgba(255,255,255,0.85)' font-family='Arial, sans-serif' font-size='11'>Romance</text>
+  <text x='75' y='186' text-anchor='middle' fill='rgba(255,255,255,0.7)' font-family='Arial, sans-serif' font-size='10'>Movie Diary Demo</text>
+</svg>

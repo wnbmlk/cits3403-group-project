@@ -9,60 +9,30 @@ const categoryButtons = document.querySelectorAll("[data-category]");
 const watchedRangeToggle = document.getElementById("watchedRangeToggle");
 const watchedDateRange = document.getElementById("watchedDateRange");
 const clearWatchedRange = document.getElementById("clearWatchedRange");
+const movieCatalogData = document.getElementById("movie-catalog-data");
 
 let watchedRangePicker = null;
 let timelineEntries = [];
 
-const catalog = [
-    {
-        title: "Parasite",
-        status: "Watched",
-        genre: "Drama • Thriller",
-        poster: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
-    },
-    {
-        title: "Interstellar",
-        status: "Want to watch",
-        genre: "Sci-Fi • Drama",
-        poster: "https://image.tmdb.org/t/p/w342/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-    },
-    {
-        title: "The Dark Knight",
-        status: "Favourite",
-        genre: "Action • Thriller",
-        poster: "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
-    },
-    {
-        title: "Inception",
-        status: "Watched",
-        genre: "Sci-Fi • Thriller",
-        poster: "https://image.tmdb.org/t/p/w342/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
-    },
-    {
-        title: "The Lord of the Rings",
-        status: "Watchlist",
-        genre: "Fantasy • Adventure",
-        poster: "https://image.tmdb.org/t/p/w342/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
-    },
-    {
-        title: "Oppenheimer",
-        status: "Watchlist",
-        genre: "Drama • Biography",
-        poster: "https://image.tmdb.org/t/p/w342/ptpr0kGAckfQkJeJIt8st5dglvd.jpg",
-    },
-    {
-        title: "Dune: Part Two",
-        status: "Watched",
-        genre: "Sci-Fi • Action",
-        poster: "https://image.tmdb.org/t/p/w342/6izwzX3K8mLrZQ9y3FMhFjJw3k.jpg",
-    },
-    {
-        title: "Severance",
-        status: "Watching",
-        genre: "Mystery • Drama",
-        poster: "https://image.tmdb.org/t/p/w342/mbXQb9Q0mVfM6R1nF8l6HfBq0d8.jpg",
-    },
-];
+function loadCatalog() {
+    if (!movieCatalogData) {
+        return [];
+    }
+
+    try {
+        return JSON.parse(movieCatalogData.textContent || "[]");
+    } catch (error) {
+        console.error("Error loading movie catalog:", error);
+        return [];
+    }
+}
+
+const catalog = loadCatalog().map((movie) => ({
+    title: movie.title,
+    status: movie.status || "Watched",
+    genre: movie.genre || "",
+    poster: movie.poster_path || "/static/images/posters/placeholder.svg",
+}));
 
 const filterState = {
     category: "all",
@@ -108,13 +78,13 @@ async function fetchTimelineEntries() {
             title: entry.title,
             status: entry.status,
             genre: entry.genre || "",
+            poster: entry.poster_path || null,
             date: new Date(entry.date).toLocaleDateString("en-US", {
                 month: "short",
                 day: "2-digit",
                 year: "numeric",
             }),
             dateISO: entry.date.split("T")[0],
-            poster: null,
         }));
         return timelineEntries;
     } catch (error) {
@@ -124,7 +94,7 @@ async function fetchTimelineEntries() {
     }
 }
 
-async function saveTimelineEntry(title, status, genre, date) {
+async function saveTimelineEntry(title, status, genre, date, posterPath = null) {
     try {
         const response = await fetch("/api/diary/entries", {
             method: "POST",
@@ -133,6 +103,7 @@ async function saveTimelineEntry(title, status, genre, date) {
                 title,
                 status,
                 genre,
+                poster_path: posterPath,
                 date: date + "T00:00:00Z",
             }),
         });
@@ -148,7 +119,7 @@ async function saveTimelineEntry(title, status, genre, date) {
     }
 }
 
-async function updateTimelineEntry(id, title, status, genre, date) {
+async function updateTimelineEntry(id, title, status, genre, date, posterPath = null) {
     try {
         const response = await fetch(`/api/diary/entries/${id}`, {
             method: "PUT",
@@ -157,6 +128,7 @@ async function updateTimelineEntry(id, title, status, genre, date) {
                 title,
                 status,
                 genre,
+                poster_path: posterPath,
                 date: date + "T00:00:00Z",
             }),
         });
@@ -266,7 +238,7 @@ async function renderTimeline() {
 
         article.dataset.id = item.id;
         timeStamp.textContent = item.date || "New entry";
-        image.src = item.poster || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='225'%3E%3Crect width='150' height='225' fill='%23ddd'/%3E%3Ctext x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='12'%3ENo poster%3C/text%3E%3C/svg%3E";
+        image.src = item.poster || "/static/images/posters/placeholder.svg";
         image.alt = `${item.title} poster`;
         title.textContent = item.title;
         status.textContent = `${item.status}${item.genre ? ` • ${item.genre}` : ""}`;
@@ -325,7 +297,8 @@ async function addMovieToTimeline(movie) {
         movie.title,
         status,
         movie.genre || "",
-        dateISO
+        dateISO,
+        movie.poster || null
     );
 
     if (entry) {

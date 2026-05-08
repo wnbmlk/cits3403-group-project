@@ -5,7 +5,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .extensions import db
-from .models import DiaryEntry, User
+from .models import DiaryEntry, Movie, User
 
 
 def validate_password(password):
@@ -136,7 +136,8 @@ def logout():
 
 @login_required
 def diary():
-    return render_template("diary.html")
+    movie_catalog = [movie.to_dict() for movie in Movie.query.order_by(Movie.title.asc()).all()]
+    return render_template("diary.html", movie_catalog=movie_catalog)
 
 
 @login_required
@@ -163,6 +164,7 @@ def create_diary_entry():
         title=data["title"],
         status=data["status"],
         genre=data.get("genre"),
+        poster_path=data.get("poster_path"),
         date=date,
         user_id=current_user.id,
     )
@@ -192,6 +194,8 @@ def update_diary_entry(entry_id):
         entry.status = data["status"]
     if "genre" in data:
         entry.genre = data["genre"]
+    if "poster_path" in data:
+        entry.poster_path = data["poster_path"]
     if "date" in data:
         try:
             entry.date = datetime.fromisoformat(data["date"].replace("Z", "+00:00"))
