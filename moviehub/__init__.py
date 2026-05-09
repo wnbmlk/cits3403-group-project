@@ -44,5 +44,6 @@ def create_app(config_object=Config):
     app.add_url_rule("/api/diary/entries", endpoint="create_diary_entry", view_func=routes.create_diary_entry, methods=["POST"])
     app.add_url_rule("/api/diary/entries/<int:entry_id>", endpoint="update_diary_entry", view_func=routes.update_diary_entry, methods=["PUT"])
     app.add_url_rule("/api/diary/entries/<int:entry_id>", endpoint="delete_diary_entry", view_func=routes.delete_diary_entry, methods=["DELETE"])
+    app.add_url_rule("/movie/<int:movie_id>", "movie_detail", routes.movie_detail)
 
     return app
