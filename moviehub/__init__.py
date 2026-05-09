@@ -1,4 +1,5 @@
 from pathlib import Path
+from sqlalchemy import inspect, text
 
 from flask import Flask, flash, redirect, url_for
 
@@ -32,6 +33,11 @@ def create_app(config_object=Config):
         flash("Please log in to access the diary and profile pages.", "warning")
         return redirect(url_for("login"))
 
+    with app.app_context():
+        _ensure_diary_entry_poster_column()
+        _ensure_diary_entry_date_watched_end_column()
+        _ensure_movie_columns()
+
     app.add_url_rule("/", endpoint="home", view_func=routes.home)
     app.add_url_rule("/about", endpoint="about", view_func=routes.about)
     app.add_url_rule("/api/password-strength", endpoint="check_password_strength", view_func=routes.check_password_strength, methods=["POST"])
@@ -42,7 +48,60 @@ def create_app(config_object=Config):
     app.add_url_rule("/diary", endpoint="diary", view_func=routes.diary)
     app.add_url_rule("/api/diary/entries", endpoint="get_diary_entries", view_func=routes.get_diary_entries, methods=["GET"])
     app.add_url_rule("/api/diary/entries", endpoint="create_diary_entry", view_func=routes.create_diary_entry, methods=["POST"])
+    app.add_url_rule("/api/diary/manual-entry", endpoint="create_manual_diary_entry", view_func=routes.create_manual_diary_entry, methods=["POST"])
     app.add_url_rule("/api/diary/entries/<int:entry_id>", endpoint="update_diary_entry", view_func=routes.update_diary_entry, methods=["PUT"])
     app.add_url_rule("/api/diary/entries/<int:entry_id>", endpoint="delete_diary_entry", view_func=routes.delete_diary_entry, methods=["DELETE"])
 
     return app
+
+
+def _ensure_diary_entry_poster_column():
+    engine = db.engine
+    if engine.dialect.name != "sqlite":
+        return
+
+    inspector = inspect(engine)
+    columns = {column["name"] for column in inspector.get_columns("diary_entry")}
+    if "poster_path" in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE diary_entry ADD COLUMN poster_path VARCHAR(255)"))
+
+
+def _ensure_movie_columns():
+    engine = db.engine
+    if engine.dialect.name != "sqlite":
+        return
+
+    inspector = inspect(engine)
+    if "movie" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("movie")}
+    statements = []
+    if "status" not in columns:
+        statements.append("ALTER TABLE movie ADD COLUMN status VARCHAR(50)")
+    if "poster_path" not in columns:
+        statements.append("ALTER TABLE movie ADD COLUMN poster_path VARCHAR(255)")
+
+    if not statements:
+        return
+
+    with engine.begin() as connection:
+        for statement in statements:
+            connection.execute(text(statement))
+
+
+def _ensure_diary_entry_date_watched_end_column():
+    engine = db.engine
+    if engine.dialect.name != "sqlite":
+        return
+
+    inspector = inspect(engine)
+    columns = {column["name"] for column in inspector.get_columns("diary_entry")}
+    if "date_watched_end" in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE diary_entry ADD COLUMN date_watched_end DATETIME"))

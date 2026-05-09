@@ -3,66 +3,66 @@ const movieModal = document.getElementById("movieModal");
 const closeMovieModal = document.getElementById("closeMovieModal");
 const movieSearch = document.getElementById("movieSearch");
 const searchResults = document.getElementById("searchResults");
+const manualAddSection = document.getElementById("manualAddSection");
+const manualTitleInput = document.getElementById("manualTitleInput");
+const manualGenreInput = document.getElementById("manualGenreInput");
+const manualPhotoInput = document.getElementById("manualPhotoInput");
+const manualAddSubmit = document.getElementById("manualAddSubmit");
+const manualAddError = document.getElementById("manualAddError");
+const statusPrompt = document.getElementById("statusPrompt");
+const statusPromptMovieTitle = document.getElementById("statusPromptMovieTitle");
+const confirmAddMovie = document.getElementById("confirmAddMovie");
+const cancelStatusPrompt = document.getElementById("cancelStatusPrompt");
 const movieTemplate = document.getElementById("timelineMovieTemplate");
 const addTemplate = document.getElementById("timelineAddTemplate");
 const categoryButtons = document.querySelectorAll("[data-category]");
-const watchedRangeToggle = document.getElementById("watchedRangeToggle");
 const watchedDateRange = document.getElementById("watchedDateRange");
+const applyWatchedRange = document.getElementById("applyWatchedRange");
 const clearWatchedRange = document.getElementById("clearWatchedRange");
+const movieCatalogData = document.getElementById("movie-catalog-data");
+const watchDateSingleInput = document.getElementById("watchDateSingle");
+const watchDateStartInput = document.getElementById("watchDateStart");
+const watchDateEndInput = document.getElementById("watchDateEnd");
+const singleDatePickerDiv = document.getElementById("singleDatePicker");
+const rangeDatePickerDiv = document.getElementById("rangeDatePicker");
+const dateModeSingleRadio = document.querySelector('input[name="dateMode"][value="single"]');
+const dateModeRangeRadio = document.querySelector('input[name="dateMode"][value="range"]');
+const manualWatchDateSingleInput = document.getElementById("manualWatchDateSingle");
+const manualWatchDateStartInput = document.getElementById("manualWatchDateStart");
+const manualWatchDateEndInput = document.getElementById("manualWatchDateEnd");
+const manualSingleDatePickerDiv = document.getElementById("manualSingleDatePicker");
+const manualRangeDatePickerDiv = document.getElementById("manualRangeDatePicker");
+const manualDateModeSingleRadio = document.querySelector('input[name="manualDateMode"][value="single"]');
+const manualDateModeRangeRadio = document.querySelector('input[name="manualDateMode"][value="range"]');
 
 let watchedRangePicker = null;
 let timelineEntries = [];
+let pendingMovie = null;
+let watchDateSinglePicker = null;
+let watchDateStartPicker = null;
+let watchDateEndPicker = null;
+let manualWatchDateSinglePicker = null;
+let manualWatchDateStartPicker = null;
+let manualWatchDateEndPicker = null;
 
-const catalog = [
-    {
-        title: "Parasite",
-        status: "Watched",
-        genre: "Drama • Thriller",
-        poster: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
-    },
-    {
-        title: "Interstellar",
-        status: "Want to watch",
-        genre: "Sci-Fi • Drama",
-        poster: "https://image.tmdb.org/t/p/w342/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-    },
-    {
-        title: "The Dark Knight",
-        status: "Favourite",
-        genre: "Action • Thriller",
-        poster: "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
-    },
-    {
-        title: "Inception",
-        status: "Watched",
-        genre: "Sci-Fi • Thriller",
-        poster: "https://image.tmdb.org/t/p/w342/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
-    },
-    {
-        title: "The Lord of the Rings",
-        status: "Watchlist",
-        genre: "Fantasy • Adventure",
-        poster: "https://image.tmdb.org/t/p/w342/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
-    },
-    {
-        title: "Oppenheimer",
-        status: "Watchlist",
-        genre: "Drama • Biography",
-        poster: "https://image.tmdb.org/t/p/w342/ptpr0kGAckfQkJeJIt8st5dglvd.jpg",
-    },
-    {
-        title: "Dune: Part Two",
-        status: "Watched",
-        genre: "Sci-Fi • Action",
-        poster: "https://image.tmdb.org/t/p/w342/6izwzX3K8mLrZQ9y3FMhFjJw3k.jpg",
-    },
-    {
-        title: "Severance",
-        status: "Watching",
-        genre: "Mystery • Drama",
-        poster: "https://image.tmdb.org/t/p/w342/mbXQb9Q0mVfM6R1nF8l6HfBq0d8.jpg",
-    },
-];
+function loadCatalog() {
+    if (!movieCatalogData) {
+        return [];
+    }
+
+    try {
+        return JSON.parse(movieCatalogData.textContent || "[]");
+    } catch (error) {
+        console.error("Error loading movie catalog:", error);
+        return [];
+    }
+}
+
+const catalog = loadCatalog().map((movie) => ({
+    title: movie.title,
+    genre: movie.genre || "",
+    poster: movie.poster_path || "/static/images/posters/placeholder.svg",
+}));
 
 const filterState = {
     category: "all",
@@ -78,17 +78,28 @@ function slugify(text) {
         .replace(/^-+|-+$/g, "");
 }
 
+function toLocalISODate(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
 function parseLegacyDateISO(item) {
     if (item.date) {
         try {
             const date = new Date(item.date);
             if (!Number.isNaN(date.getTime())) {
-                return date.toISOString().slice(0, 10);
+                return toLocalISODate(date);
             }
         } catch (e) {}
     }
 
-    return new Date().toISOString().slice(0, 10);
+    return toLocalISODate(new Date());
 }
 
 async function fetchTimelineEntries() {
@@ -108,13 +119,10 @@ async function fetchTimelineEntries() {
             title: entry.title,
             status: entry.status,
             genre: entry.genre || "",
-            date: new Date(entry.date).toLocaleDateString("en-US", {
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-            }),
+            poster: entry.poster_path || null,
+            dateLabel: formatWatchDateLabel(entry.date, entry.date_watched_end),
             dateISO: entry.date.split("T")[0],
-            poster: null,
+            dateEndISO: entry.date_watched_end ? entry.date_watched_end.split("T")[0] : entry.date.split("T")[0],
         }));
         return timelineEntries;
     } catch (error) {
@@ -124,17 +132,22 @@ async function fetchTimelineEntries() {
     }
 }
 
-async function saveTimelineEntry(title, status, genre, date) {
+async function saveTimelineEntry(title, status, genre, date, posterPath = null, dateWatchedEnd = null) {
     try {
+        const body = {
+            title,
+            status,
+            genre,
+            poster_path: posterPath,
+            date: date + "T00:00:00Z",
+        };
+        if (dateWatchedEnd) {
+            body.date_watched_end = dateWatchedEnd + "T00:00:00Z";
+        }
         const response = await fetch("/api/diary/entries", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                title,
-                status,
-                genre,
-                date: date + "T00:00:00Z",
-            }),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -148,17 +161,22 @@ async function saveTimelineEntry(title, status, genre, date) {
     }
 }
 
-async function updateTimelineEntry(id, title, status, genre, date) {
+async function updateTimelineEntry(id, title, status, genre, date, posterPath = null, dateWatchedEnd = null) {
     try {
+        const body = {
+            title,
+            status,
+            genre,
+            poster_path: posterPath,
+            date: date + "T00:00:00Z",
+        };
+        if (dateWatchedEnd) {
+            body.date_watched_end = dateWatchedEnd + "T00:00:00Z";
+        }
         const response = await fetch(`/api/diary/entries/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                title,
-                status,
-                genre,
-                date: date + "T00:00:00Z",
-            }),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -225,15 +243,22 @@ function matchesCategory(item) {
 }
 
 function matchesRange(item) {
-    if (filterState.category !== "watched" || !filterState.useCustomRange) {
+    if (!filterState.useCustomRange) {
         return true;
     }
 
-    if (filterState.dateFrom && item.dateISO < filterState.dateFrom) {
+    if (!isWatched(item)) {
         return false;
     }
 
-    if (filterState.dateTo && item.dateISO > filterState.dateTo) {
+    const itemStart = item.dateISO;
+    const itemEnd = item.dateEndISO || item.dateISO;
+
+    if (filterState.dateFrom && itemEnd < filterState.dateFrom) {
+        return false;
+    }
+
+    if (filterState.dateTo && itemStart > filterState.dateTo) {
         return false;
     }
 
@@ -258,17 +283,19 @@ async function renderTimeline() {
     items.forEach((item, index) => {
         const movieNode = movieTemplate.content.cloneNode(true);
         const article = movieNode.querySelector(".timeline-item");
-        const timeStamp = movieNode.querySelector(".time-stamp");
         const image = movieNode.querySelector("img");
         const title = movieNode.querySelector("h3");
-        const status = movieNode.querySelector("p");
+        const watchDate = movieNode.querySelector(".watch-date");
+        const status = movieNode.querySelector(".movie-meta p:last-of-type");
         const removeButton = movieNode.querySelector(".remove-card");
 
         article.dataset.id = item.id;
-        timeStamp.textContent = item.date || "New entry";
-        image.src = item.poster || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='225'%3E%3Crect width='150' height='225' fill='%23ddd'/%3E%3Ctext x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%23999' font-size='12'%3ENo poster%3C/text%3E%3C/svg%3E";
+        image.src = item.poster || "/static/images/posters/placeholder.svg";
         image.alt = `${item.title} poster`;
         title.textContent = item.title;
+        if (watchDate) {
+            watchDate.textContent = item.dateLabel || "Watched date not set";
+        }
         status.textContent = `${item.status}${item.genre ? ` • ${item.genre}` : ""}`;
         removeButton.addEventListener("click", () => removeMovieFromTimeline(item.id));
 
@@ -284,11 +311,17 @@ async function renderTimeline() {
 function openModal() {
     movieModal.hidden = false;
     movieSearch.value = "";
+    pendingMovie = null;
+    hideStatusPrompt();
+    hideManualAddSection();
     renderResults(catalog);
     movieSearch.focus();
 }
 
 function closeModal() {
+    pendingMovie = null;
+    hideStatusPrompt();
+    hideManualAddSection();
     movieModal.hidden = true;
 }
 
@@ -297,8 +330,11 @@ function renderResults(results) {
 
     if (results.length === 0) {
         searchResults.innerHTML = '<p class="empty-search">No matches found.</p>';
+        showManualAddSection(movieSearch.value.trim());
         return;
     }
+
+    hideManualAddSection();
 
     results.forEach((movie) => {
         const button = document.createElement("button");
@@ -308,24 +344,201 @@ function renderResults(results) {
             <img src="${movie.poster}" alt="${movie.title} poster">
             <div>
                 <h3>${movie.title}</h3>
-                <p>${movie.status}${movie.genre ? ` • ${movie.genre}` : ""}</p>
+                <p>${movie.genre || "Genre not set"}</p>
             </div>
         `;
-        button.addEventListener("click", () => addMovieToTimeline(movie));
+        button.addEventListener("click", () => addMovieToTimeline(movie, button));
         searchResults.appendChild(button);
     });
 }
 
-async function addMovieToTimeline(movie) {
-    const now = new Date();
-    const dateISO = now.toISOString().split("T")[0];
-    const status = movie.status || "Watched";
+function showManualError(message) {
+    if (!manualAddError) {
+        return;
+    }
+
+    if (!message) {
+        manualAddError.hidden = true;
+        manualAddError.textContent = "";
+        return;
+    }
+
+    manualAddError.hidden = false;
+    manualAddError.textContent = message;
+}
+
+function resetManualStatuses() {
+    document.querySelectorAll(".manual-status-checkbox").forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+    const defaultStatus = document.querySelector('.manual-status-checkbox[value="Watched"]');
+    if (defaultStatus) {
+        defaultStatus.checked = true;
+    }
+}
+
+function showManualAddSection(prefillTitle = "") {
+    if (!manualAddSection) {
+        return;
+    }
+
+    manualAddSection.hidden = false;
+    if (manualTitleInput) {
+        manualTitleInput.value = prefillTitle;
+    }
+    if (manualGenreInput) {
+        manualGenreInput.value = "";
+    }
+    if (manualPhotoInput) {
+        manualPhotoInput.value = "";
+    }
+    showManualError("");
+    resetManualStatuses();
+    resetManualDatePickers();
+}
+
+function hideManualAddSection() {
+    if (!manualAddSection) {
+        return;
+    }
+
+    manualAddSection.hidden = true;
+    showManualError("");
+}
+
+function getSelectedManualStatuses() {
+    return Array.from(document.querySelectorAll(".manual-status-checkbox:checked")).map(
+        (checkbox) => checkbox.value
+    );
+}
+
+async function saveManualTimelineEntry(formData) {
+    try {
+        const response = await fetch("/api/diary/manual-entry", {
+            method: "POST",
+            body: formData,
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || "Failed to save manual entry");
+        }
+
+        return data;
+    } catch (error) {
+        showManualError(error.message || "Failed to save manual entry");
+        return null;
+    }
+}
+
+async function addManualMovieEntry() {
+    const title = (manualTitleInput?.value || "").trim();
+    const genre = (manualGenreInput?.value || "").trim();
+    const selectedStatuses = getSelectedManualStatuses();
+
+    const formData = new FormData();
+    formData.append("title", title);
+    if (genre) {
+        formData.append("genre", genre);
+    }
+    selectedStatuses.forEach((status) => {
+        formData.append("statuses", status);
+    });
+    
+    const watchDates = getManualWatchDate();
+    const dateISO = toLocalISODate(watchDates.date);
+    formData.append("date", dateISO + "T00:00:00Z");
+    if (watchDates.date_watched_end) {
+        const dateEndISO = toLocalISODate(watchDates.date_watched_end);
+        formData.append("date_watched_end", dateEndISO + "T00:00:00Z");
+    }
+
+    if (manualPhotoInput?.files && manualPhotoInput.files[0]) {
+        formData.append("photo", manualPhotoInput.files[0]);
+    }
+
+    const entry = await saveManualTimelineEntry(formData);
+    if (!entry) {
+        return;
+    }
+
+    catalog.push({
+        title: entry.title,
+        genre: entry.genre || "",
+        poster: entry.poster_path || "/static/images/posters/placeholder.svg",
+    });
+
+    await fetchTimelineEntries();
+    await renderTimeline();
+    closeModal();
+}
+
+function getSelectedStatuses() {
+    const selected = Array.from(document.querySelectorAll(".status-checkbox:checked")).map(
+        (checkbox) => checkbox.value
+    );
+    return selected;
+}
+
+function resetStatusCheckboxes() {
+    document.querySelectorAll(".status-checkbox").forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+}
+
+function showStatusPrompt(movie, selectedButton) {
+    pendingMovie = movie;
+    if (statusPromptMovieTitle) {
+        statusPromptMovieTitle.textContent = movie.title;
+    }
+    resetStatusCheckboxes();
+    const watchedCheckbox = document.querySelector('.status-checkbox[value="Watched"]');
+    if (watchedCheckbox) {
+        watchedCheckbox.checked = true;
+    }
+    resetDatePickers();
+    if (statusPrompt && selectedButton) {
+        selectedButton.insertAdjacentElement("afterend", statusPrompt);
+        statusPrompt.hidden = false;
+        statusPrompt.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        watchedCheckbox?.focus();
+    }
+}
+
+function hideStatusPrompt() {
+    if (statusPrompt) {
+        statusPrompt.hidden = true;
+    }
+    resetStatusCheckboxes();
+}
+
+async function addMovieToTimeline(movie, selectedButton) {
+    showStatusPrompt(movie, selectedButton);
+}
+
+async function confirmAddMovieToTimeline() {
+    if (!pendingMovie) {
+        return;
+    }
+
+    const selectedStatuses = getSelectedStatuses();
+    if (selectedStatuses.length === 0) {
+        alert("Please choose at least one status.");
+        return;
+    }
+
+    const watchDates = getWatchDate();
+    const dateISO = toLocalISODate(watchDates.date);
+    const dateEndISO = watchDates.date_watched_end ? toLocalISODate(watchDates.date_watched_end) : null;
+    const status = selectedStatuses.join(", ");
 
     const entry = await saveTimelineEntry(
-        movie.title,
+        pendingMovie.title,
         status,
-        movie.genre || "",
-        dateISO
+        pendingMovie.genre || "",
+        dateISO,
+        pendingMovie.poster || null,
+        dateEndISO
     );
 
     if (entry) {
@@ -350,6 +563,198 @@ function setActiveButton(buttons, activeValue, dataKey) {
     });
 }
 
+function formatWatchDateLabel(startISO, endISO) {
+    const startDate = new Date(startISO);
+    if (Number.isNaN(startDate.getTime())) {
+        return "Watched date not set";
+    }
+
+    const formatOptions = {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+    };
+
+    const startLabel = startDate.toLocaleDateString("en-US", formatOptions);
+    if (!endISO) {
+        return `Watched: ${startLabel}`;
+    }
+
+    const endDate = new Date(endISO);
+    if (Number.isNaN(endDate.getTime())) {
+        return `Watched: ${startLabel}`;
+    }
+
+    const endLabel = endDate.toLocaleDateString("en-US", formatOptions);
+    if (startLabel === endLabel) {
+        return `Watched: ${startLabel}`;
+    }
+
+    return `Watched: ${startLabel} - ${endLabel}`;
+}
+
+function initializeWatchDatePickers() {
+    if (!window.flatpickr) {
+        return;
+    }
+
+    // Single date picker for status prompt
+    if (watchDateSingleInput) {
+        watchDateSinglePicker = window.flatpickr(watchDateSingleInput, {
+            mode: "single",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            allowInput: false,
+            disableMobile: true,
+            monthSelectorType: "dropdown",
+            defaultDate: new Date(),
+        });
+    }
+
+    // Start date picker for status prompt
+    if (watchDateStartInput) {
+        watchDateStartPicker = window.flatpickr(watchDateStartInput, {
+            mode: "single",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            allowInput: false,
+            disableMobile: true,
+            monthSelectorType: "dropdown",
+        });
+    }
+
+    // End date picker for status prompt
+    if (watchDateEndInput) {
+        watchDateEndPicker = window.flatpickr(watchDateEndInput, {
+            mode: "single",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            allowInput: false,
+            disableMobile: true,
+            monthSelectorType: "dropdown",
+        });
+    }
+
+    // Single date picker for manual add
+    if (manualWatchDateSingleInput) {
+        manualWatchDateSinglePicker = window.flatpickr(manualWatchDateSingleInput, {
+            mode: "single",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            allowInput: false,
+            disableMobile: true,
+            monthSelectorType: "dropdown",
+            defaultDate: new Date(),
+        });
+    }
+
+    // Start date picker for manual add
+    if (manualWatchDateStartInput) {
+        manualWatchDateStartPicker = window.flatpickr(manualWatchDateStartInput, {
+            mode: "single",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            allowInput: false,
+            disableMobile: true,
+            monthSelectorType: "dropdown",
+        });
+    }
+
+    // End date picker for manual add
+    if (manualWatchDateEndInput) {
+        manualWatchDateEndPicker = window.flatpickr(manualWatchDateEndInput, {
+            mode: "single",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            allowInput: false,
+            disableMobile: true,
+            monthSelectorType: "dropdown",
+        });
+    }
+}
+
+function resetDatePickers() {
+    if (watchDateSinglePicker) {
+        watchDateSinglePicker.setDate(new Date());
+    }
+    if (watchDateStartPicker) {
+        watchDateStartPicker.clear(false);
+    }
+    if (watchDateEndPicker) {
+        watchDateEndPicker.clear(false);
+    }
+    if (dateModeSingleRadio) {
+        dateModeSingleRadio.checked = true;
+    }
+    if (dateModeRangeRadio) {
+        dateModeRangeRadio.checked = false;
+    }
+    if (singleDatePickerDiv) {
+        singleDatePickerDiv.hidden = false;
+    }
+    if (rangeDatePickerDiv) {
+        rangeDatePickerDiv.hidden = true;
+    }
+}
+
+function resetManualDatePickers() {
+    if (manualWatchDateSinglePicker) {
+        manualWatchDateSinglePicker.setDate(new Date());
+    }
+    if (manualWatchDateStartPicker) {
+        manualWatchDateStartPicker.clear(false);
+    }
+    if (manualWatchDateEndPicker) {
+        manualWatchDateEndPicker.clear(false);
+    }
+    if (manualDateModeSingleRadio) {
+        manualDateModeSingleRadio.checked = true;
+    }
+    if (manualDateModeRangeRadio) {
+        manualDateModeRangeRadio.checked = false;
+    }
+    if (manualSingleDatePickerDiv) {
+        manualSingleDatePickerDiv.hidden = false;
+    }
+    if (manualRangeDatePickerDiv) {
+        manualRangeDatePickerDiv.hidden = true;
+    }
+}
+
+function getWatchDate() {
+    const isRange = dateModeRangeRadio?.checked;
+    if (isRange) {
+        return {
+            date: watchDateStartPicker?.selectedDates[0] || new Date(),
+            date_watched_end: watchDateEndPicker?.selectedDates[0] || new Date(),
+        };
+    }
+    return {
+        date: watchDateSinglePicker?.selectedDates[0] || new Date(),
+        date_watched_end: null,
+    };
+}
+
+function getManualWatchDate() {
+    const isRange = manualDateModeRangeRadio?.checked;
+    if (isRange) {
+        return {
+            date: manualWatchDateStartPicker?.selectedDates[0] || new Date(),
+            date_watched_end: manualWatchDateEndPicker?.selectedDates[0] || new Date(),
+        };
+    }
+    return {
+        date: manualWatchDateSinglePicker?.selectedDates[0] || new Date(),
+        date_watched_end: null,
+    };
+}
+
 function initializeRangePicker() {
     if (!window.flatpickr || !watchedDateRange) {
         return;
@@ -363,30 +768,11 @@ function initializeRangePicker() {
         allowInput: false,
         disableMobile: true,
         monthSelectorType: "dropdown",
-        onOpen() {
-            if (!filterState.useCustomRange) {
-                filterState.useCustomRange = true;
-                filterState.category = "watched";
-                setActiveButton(categoryButtons, "watched", "category");
-                syncRangeControls();
-            }
-        },
-        onChange(selectedDates) {
-            if (selectedDates.length === 2) {
-                filterState.useCustomRange = true;
-                filterState.category = "watched";
-                filterState.dateFrom = selectedDates[0].toISOString().slice(0, 10);
-                filterState.dateTo = selectedDates[1].toISOString().slice(0, 10);
-                setActiveButton(categoryButtons, "watched", "category");
-                syncRangeControls();
-            }
-        },
+        onChange() {},
     });
 }
 
 function syncRangeControls() {
-    watchedRangeToggle.checked = filterState.useCustomRange;
-
     if (watchedRangePicker) {
         if (filterState.useCustomRange && filterState.dateFrom && filterState.dateTo) {
             watchedRangePicker.setDate([filterState.dateFrom, filterState.dateTo], false, "Y-m-d");
@@ -404,18 +790,6 @@ categoryButtons.forEach((button) => {
     });
 });
 
-watchedRangeToggle.addEventListener("change", async () => {
-    filterState.useCustomRange = watchedRangeToggle.checked;
-    filterState.category = "watched";
-    if (!filterState.useCustomRange) {
-        filterState.dateFrom = "";
-        filterState.dateTo = "";
-    }
-    setActiveButton(categoryButtons, "watched", "category");
-    syncRangeControls();
-    await renderTimeline();
-});
-
 clearWatchedRange.addEventListener("click", async () => {
     filterState.useCustomRange = false;
     filterState.dateFrom = "";
@@ -424,11 +798,97 @@ clearWatchedRange.addEventListener("click", async () => {
     await renderTimeline();
 });
 
+if (applyWatchedRange) {
+    applyWatchedRange.addEventListener("click", async () => {
+        if (!watchedRangePicker) {
+            return;
+        }
+
+        const selectedDates = watchedRangePicker.selectedDates || [];
+        if (selectedDates.length === 0) {
+            alert("Please pick at least one watched date.");
+            return;
+        }
+
+        const fromDate = toLocalISODate(selectedDates[0]);
+        const toDate = toLocalISODate(selectedDates[1] || selectedDates[0]);
+
+        filterState.useCustomRange = true;
+        filterState.category = "watched";
+        filterState.dateFrom = fromDate;
+        filterState.dateTo = toDate;
+        setActiveButton(categoryButtons, "watched", "category");
+        syncRangeControls();
+        await renderTimeline();
+    });
+}
+
 movieSearch.addEventListener("input", () => {
+    pendingMovie = null;
+    hideStatusPrompt();
     const term = movieSearch.value.trim().toLowerCase();
     const filtered = catalog.filter((movie) => movie.title.toLowerCase().includes(term));
     renderResults(filtered);
 });
+
+if (manualAddSubmit) {
+    manualAddSubmit.addEventListener("click", addManualMovieEntry);
+}
+
+if (confirmAddMovie) {
+    confirmAddMovie.addEventListener("click", confirmAddMovieToTimeline);
+}
+
+if (cancelStatusPrompt) {
+    cancelStatusPrompt.addEventListener("click", () => {
+        pendingMovie = null;
+        hideStatusPrompt();
+    });
+}
+
+if (dateModeSingleRadio) {
+    dateModeSingleRadio.addEventListener("change", () => {
+        if (singleDatePickerDiv) {
+            singleDatePickerDiv.hidden = false;
+        }
+        if (rangeDatePickerDiv) {
+            rangeDatePickerDiv.hidden = true;
+        }
+    });
+}
+
+if (dateModeRangeRadio) {
+    dateModeRangeRadio.addEventListener("change", () => {
+        if (singleDatePickerDiv) {
+            singleDatePickerDiv.hidden = true;
+        }
+        if (rangeDatePickerDiv) {
+            rangeDatePickerDiv.hidden = false;
+        }
+    });
+}
+
+if (manualDateModeSingleRadio) {
+    manualDateModeSingleRadio.addEventListener("change", () => {
+        if (manualSingleDatePickerDiv) {
+            manualSingleDatePickerDiv.hidden = false;
+        }
+        if (manualRangeDatePickerDiv) {
+            manualRangeDatePickerDiv.hidden = true;
+        }
+    });
+}
+
+if (manualDateModeRangeRadio) {
+    manualDateModeRangeRadio.addEventListener("change", () => {
+        if (manualSingleDatePickerDiv) {
+            manualSingleDatePickerDiv.hidden = true;
+        }
+        if (manualRangeDatePickerDiv) {
+            manualRangeDatePickerDiv.hidden = false;
+        }
+    });
+}
 
 closeMovieModal.addEventListener("click", closeModal);
 movieModal.addEventListener("click", (event) => {
@@ -444,6 +904,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 initializeRangePicker();
+initializeWatchDatePickers();
 syncRangeControls();
 
 // Initialize the diary page

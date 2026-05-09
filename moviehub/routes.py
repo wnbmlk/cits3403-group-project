@@ -1,11 +1,117 @@
 from datetime import datetime
+from pathlib import Path
+from uuid import uuid4
 
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 
 from .extensions import db
-from .models import DiaryEntry, User
+from .models import DiaryEntry, Movie, User
+
+
+ALLOWED_STATUS_MAP = {
+    "watched": "Watched",
+    "watchlist": "Watchlist",
+    "favourite": "Favourite",
+    "favorite": "Favourite",
+    "watching": "Watching",
+}
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+
+
+def _normalize_statuses(values):
+    if isinstance(values, str):
+        raw_values = [chunk.strip() for chunk in values.split(",")]
+    else:
+        raw_values = [str(value).strip() for value in (values or [])]
+
+    normalized = []
+    for value in raw_values:
+        key = value.lower()
+        if not key:
+            continue
+        mapped = ALLOWED_STATUS_MAP.get(key)
+        if mapped and mapped not in normalized:
+            normalized.append(mapped)
+
+    return normalized
+
+
+def _validate_title(value):
+    title = (value or "").strip()
+    if not title:
+        return None, "Title is required"
+    if len(title) > 200:
+        return None, "Title must be 200 characters or less"
+    return title, None
+
+
+def _validate_genre(value):
+    genre = (value or "").strip()
+    if len(genre) > 100:
+        return None, "Genre must be 100 characters or less"
+    return genre or None, None
+
+
+def _parse_date_or_today(value):
+    if not value:
+        now = datetime.utcnow()
+        return now.replace(hour=0, minute=0, second=0, microsecond=0), None
+
+    try:
+        date = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return date, None
+    except (ValueError, AttributeError):
+        return None, "Invalid date format"
+
+
+def _save_uploaded_poster(file_storage):
+    if not file_storage:
+        return None, None
+
+    filename = secure_filename(file_storage.filename or "")
+    if not filename:
+        return None, None
+
+    extension = Path(filename).suffix.lower()
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return None, "Unsupported image type"
+
+    file_storage.stream.seek(0, 2)
+    size = file_storage.stream.tell()
+    file_storage.stream.seek(0)
+    if size > MAX_UPLOAD_SIZE:
+        return None, "Image must be 5MB or smaller"
+
+    uploads_dir = Path(__file__).resolve().parent.parent / "static" / "images" / "posters" / "uploads"
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+
+    safe_name = f"{uuid4().hex}{extension}"
+    target = uploads_dir / safe_name
+    file_storage.save(target)
+
+    return f"/static/images/posters/uploads/{safe_name}", None
+
+
+def _upsert_movie_catalog_entry(title, genre=None, poster_path=None):
+    existing_movie = Movie.query.filter(db.func.lower(Movie.title) == title.lower()).first()
+    if existing_movie:
+        if genre and not existing_movie.genre:
+            existing_movie.genre = genre
+        if poster_path and not existing_movie.poster_path:
+            existing_movie.poster_path = poster_path
+        return
+
+    db.session.add(
+        Movie(
+            title=title,
+            genre=genre,
+            poster_path=poster_path,
+        )
+    )
 
 
 def validate_password(password):
@@ -136,7 +242,8 @@ def logout():
 
 @login_required
 def diary():
-    return render_template("diary.html")
+    movie_catalog = [movie.to_dict() for movie in Movie.query.order_by(Movie.title.asc()).all()]
+    return render_template("diary.html", movie_catalog=movie_catalog)
 
 
 @login_required
@@ -154,20 +261,42 @@ def create_diary_entry():
     if not data or "title" not in data or "status" not in data or "date" not in data:
         return {"error": "Missing required fields"}, 400
 
-    try:
-        date = datetime.fromisoformat(data["date"].replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return {"error": "Invalid date format"}, 400
+    title, title_error = _validate_title(data.get("title"))
+    if title_error:
+        return {"error": title_error}, 400
+
+    statuses = _normalize_statuses(data.get("status"))
+    if not statuses:
+        return {"error": "Please provide at least one valid status"}, 400
+
+    genre, genre_error = _validate_genre(data.get("genre"))
+    if genre_error:
+        return {"error": genre_error}, 400
+
+    date, date_error = _parse_date_or_today(data.get("date"))
+    if date_error:
+        return {"error": date_error}, 400
+
+    date_watched_end = None
+    if data.get("date_watched_end"):
+        date_watched_end, date_error = _parse_date_or_today(data.get("date_watched_end"))
+        if date_error:
+            return {"error": date_error}, 400
+
+    poster_path = (data.get("poster_path") or "").strip() or None
 
     entry = DiaryEntry(
-        title=data["title"],
-        status=data["status"],
-        genre=data.get("genre"),
+        title=title,
+        status=", ".join(statuses),
+        genre=genre,
+        poster_path=poster_path,
         date=date,
+        date_watched_end=date_watched_end,
         user_id=current_user.id,
     )
 
     db.session.add(entry)
+    _upsert_movie_catalog_entry(title=title, genre=genre, poster_path=poster_path)
     db.session.commit()
 
     return entry.to_dict(), 201
@@ -187,19 +316,86 @@ def update_diary_entry(entry_id):
     data = request.get_json()
 
     if "title" in data:
-        entry.title = data["title"]
+        title, title_error = _validate_title(data.get("title"))
+        if title_error:
+            return {"error": title_error}, 400
+        entry.title = title
     if "status" in data:
-        entry.status = data["status"]
+        statuses = _normalize_statuses(data.get("status"))
+        if not statuses:
+            return {"error": "Please provide at least one valid status"}, 400
+        entry.status = ", ".join(statuses)
     if "genre" in data:
-        entry.genre = data["genre"]
+        genre, genre_error = _validate_genre(data.get("genre"))
+        if genre_error:
+            return {"error": genre_error}, 400
+        entry.genre = genre
+    if "poster_path" in data:
+        entry.poster_path = (data.get("poster_path") or "").strip() or None
     if "date" in data:
-        try:
-            entry.date = datetime.fromisoformat(data["date"].replace("Z", "+00:00"))
-        except (ValueError, AttributeError):
-            return {"error": "Invalid date format"}, 400
+        date, date_error = _parse_date_or_today(data.get("date"))
+        if date_error:
+            return {"error": date_error}, 400
+        entry.date = date
+    if "date_watched_end" in data:
+        if data.get("date_watched_end"):
+            date_watched_end, date_error = _parse_date_or_today(data.get("date_watched_end"))
+            if date_error:
+                return {"error": date_error}, 400
+            entry.date_watched_end = date_watched_end
+        else:
+            entry.date_watched_end = None
 
+    _upsert_movie_catalog_entry(title=entry.title, genre=entry.genre, poster_path=entry.poster_path)
     db.session.commit()
     return entry.to_dict()
+
+
+@login_required
+def create_manual_diary_entry():
+    title, title_error = _validate_title(request.form.get("title"))
+    if title_error:
+        return {"error": title_error}, 400
+
+    genre, genre_error = _validate_genre(request.form.get("genre"))
+    if genre_error:
+        return {"error": genre_error}, 400
+
+    statuses = _normalize_statuses(request.form.getlist("statuses"))
+    if not statuses:
+        statuses = _normalize_statuses(request.form.get("status"))
+    if not statuses:
+        return {"error": "Please choose at least one valid status"}, 400
+
+    date, date_error = _parse_date_or_today(request.form.get("date"))
+    if date_error:
+        return {"error": date_error}, 400
+
+    date_watched_end = None
+    if request.form.get("date_watched_end"):
+        date_watched_end, date_error = _parse_date_or_today(request.form.get("date_watched_end"))
+        if date_error:
+            return {"error": date_error}, 400
+
+    poster_path, upload_error = _save_uploaded_poster(request.files.get("photo"))
+    if upload_error:
+        return {"error": upload_error}, 400
+
+    entry = DiaryEntry(
+        title=title,
+        status=", ".join(statuses),
+        genre=genre,
+        poster_path=poster_path,
+        date=date,
+        date_watched_end=date_watched_end,
+        user_id=current_user.id,
+    )
+
+    db.session.add(entry)
+    _upsert_movie_catalog_entry(title=title, genre=genre, poster_path=poster_path)
+    db.session.commit()
+
+    return entry.to_dict(), 201
 
 
 @login_required
