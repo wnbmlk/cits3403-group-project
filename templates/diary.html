@@ -26,15 +26,12 @@
 
             <div class="card sidebar-card mb-3">
                 <div class="card-body">
-                    <h2 class="card-title h6 mb-2">Watched timeline</h2>
-                    <p class="sidebar-note text-muted small">Use a custom watched range to shorten the timeline.</p>
-                    <div class="d-flex justify-content-between align-items-center mb-3 toggle-row">
-                        <label for="watchedRangeToggle" class="form-label mb-0 small">Custom date range</label>
-                        <input id="watchedRangeToggle" class="form-check-input" type="checkbox">
-                    </div>
-                    <label class="form-label small text-muted" for="watchedDateRange">Select range</label>
-                    <input id="watchedDateRange" class="form-control date-range-input mb-2" type="text" placeholder="Pick start and end date">
+                    <h2 class="card-title h6 mb-2">Watch Range</h2>
+                    <p class="sidebar-note text-muted small">Pick one day or a start/end range, then apply.</p>
+                    <label class="form-label small text-muted" for="watchedDateRange">Day or From - To</label>
+                    <input id="watchedDateRange" class="form-control date-range-input mb-2" type="text" placeholder="Pick one day or start/end dates">
                     <div class="d-grid">
+                        <button id="applyWatchedRange" class="range-btn mb-2" type="button">Apply watched range</button>
                         <button id="clearWatchedRange" class="range-btn" type="button">Clear watched range</button>
                     </div>
                 </div>
@@ -147,12 +144,12 @@
 
 <template id="timelineMovieTemplate">
     <article class="timeline-item movie-item">
-        <p class="time-stamp"></p>
         <div class="movie-card">
             <button class="remove-card" type="button" aria-label="Remove movie">×</button>
             <img alt="">
             <div class="movie-meta">
                 <h3></h3>
+                <p class="watch-date"></p>
                 <p></p>
             </div>
         </div>
