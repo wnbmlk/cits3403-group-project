@@ -1,3 +1,4 @@
+from .movie_data import MOVIES, get_movie
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -139,7 +140,7 @@ def validate_password(password):
 
 
 def home():
-    return render_template("index.html")
+    return render_template("index.html", movies=MOVIES)
 
 
 def about():
@@ -413,3 +414,11 @@ def delete_diary_entry(entry_id):
     db.session.commit()
 
     return {"success": True}
+
+def movie_detail(movie_id):
+    movie = get_movie(movie_id)
+
+    if movie is None:
+        return "Movie not found", 404
+
+    return render_template("movie_detail.html", movie=movie)
