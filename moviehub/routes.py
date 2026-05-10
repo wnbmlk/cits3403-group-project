@@ -231,9 +231,70 @@ def login():
     return render_template("login.html")
 
 
+def _entry_status_tokens(entry):
+    return set(_normalize_statuses(entry.status))
+
+
+def _entry_has_status(entry, status_name):
+    return status_name in _entry_status_tokens(entry)
+
+
+def _format_profile_date(entry_date):
+    if not entry_date:
+        return "Unknown date"
+
+    return entry_date.strftime("%d %b %Y")
+
+
+def _build_profile_summary(user_id):
+    entries = DiaryEntry.query.filter_by(user_id=user_id).order_by(DiaryEntry.date.desc()).all()
+
+    watched_entries = []
+    watching_entries = []
+    watchlist_entries = []
+    favourite_entries = []
+
+    for entry in entries:
+        item = {
+            "id": entry.id,
+            "title": entry.title,
+            "genre": entry.genre,
+            "status": entry.status,
+            "date_label": _format_profile_date(entry.date),
+            "date_range_label": (
+                f"{_format_profile_date(entry.date)} - {_format_profile_date(entry.date_watched_end)}"
+                if entry.date_watched_end
+                else _format_profile_date(entry.date)
+            ),
+        }
+
+        if _entry_has_status(entry, "Watched"):
+            watched_entries.append(item)
+        if _entry_has_status(entry, "Watching"):
+            watching_entries.append(item)
+        if _entry_has_status(entry, "Watchlist"):
+            watchlist_entries.append(item)
+        if _entry_has_status(entry, "Favourite"):
+            favourite_entries.append(item)
+
+    return {
+        "watched": watched_entries[:5],
+        "watching": watching_entries[:5],
+        "watchlist": watchlist_entries[:5],
+        "favourites": favourite_entries[:10],
+        "counts": {
+            "watched": len(watched_entries),
+            "watching": len(watching_entries),
+            "watchlist": len(watchlist_entries),
+            "favourites": len(favourite_entries),
+        },
+    }
+
+
 @login_required
 def profile():
-    return render_template("profile.html", user=current_user)
+    profile_summary = _build_profile_summary(current_user.id)
+    return render_template("profile.html", user=current_user, profile_summary=profile_summary)
 
 
 @login_required
