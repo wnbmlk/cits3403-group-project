@@ -1,7 +1,9 @@
 from pathlib import Path
+from uuid import uuid4
 from sqlalchemy import inspect, text
 
-from flask import Flask, flash, redirect, url_for
+from flask import Flask, flash, redirect, session, url_for
+from flask_login import current_user, logout_user
 
 from . import routes
 from .config import Config
@@ -17,6 +19,7 @@ def create_app(config_object=Config):
         static_folder=str(base_dir / "static"),
     )
     app.config.from_object(config_object)
+    app.config["SESSION_BOOT_ID"] = uuid4().hex
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -31,6 +34,21 @@ def create_app(config_object=Config):
     @login_manager.unauthorized_handler
     def unauthorized():
         flash("Please log in to access the diary and profile pages.", "warning")
+        return redirect(url_for("login"))
+
+    @app.before_request
+    def invalidate_stale_sessions():
+        if not current_user.is_authenticated:
+            return
+
+        session_boot_id = session.get("boot_id")
+        current_boot_id = app.config.get("SESSION_BOOT_ID")
+        if session_boot_id and session_boot_id == current_boot_id:
+            return
+
+        logout_user()
+        session.clear()
+        flash("Your session expired when the app restarted. Please log in again.", "warning")
         return redirect(url_for("login"))
 
     with app.app_context():

@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from flask import flash, redirect, render_template, request, url_for
+from flask import current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -204,6 +204,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
         login_user(user)
+        session["boot_id"] = current_app.config.get("SESSION_BOOT_ID")
         return redirect(url_for("profile"))
 
     return render_template("signup.html")
@@ -213,14 +214,15 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        remember = bool(request.form.get("remember"))
 
         user = None
         if username:
             user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            login_user(user, remember=remember)
+            session.permanent = False
+            login_user(user, remember=False)
+            session["boot_id"] = current_app.config.get("SESSION_BOOT_ID")
             return redirect(url_for("profile"))
 
         flash("Invalid credentials", "danger")
@@ -237,6 +239,7 @@ def profile():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for("home"))
 
 
