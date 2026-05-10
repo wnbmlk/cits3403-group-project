@@ -1,3 +1,4 @@
+# Route handlers and backend helpers for authentication, diary, search, and profile summaries.
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -292,10 +293,45 @@ def _build_profile_summary(user_id):
     }
 
 
+def _find_user_by_username(username):
+    normalized_username = (username or "").strip()
+    if not normalized_username:
+        return None
+
+    return User.query.filter(db.func.lower(User.username) == normalized_username.lower()).first()
+
+
 @login_required
 def profile():
     profile_summary = _build_profile_summary(current_user.id)
-    return render_template("profile.html", user=current_user, profile_summary=profile_summary)
+    return render_template(
+        "profile.html",
+        profile_user=current_user,
+        profile_summary=profile_summary,
+        is_public=False,
+    )
+
+
+@login_required
+def user_search():
+    query = (request.args.get("q") or "").strip()
+    searched_user = _find_user_by_username(query) if query else None
+    return render_template("users_search.html", query=query, searched_user=searched_user)
+
+
+@login_required
+def public_profile(username):
+    profile_user = _find_user_by_username(username)
+    if not profile_user:
+        return render_template("users_search.html", query=username, searched_user=None, search_error="User not found"), 404
+
+    profile_summary = _build_profile_summary(profile_user.id)
+    return render_template(
+        "profile.html",
+        profile_user=profile_user,
+        profile_summary=profile_summary,
+        is_public=True,
+    )
 
 
 @login_required

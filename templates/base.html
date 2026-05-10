@@ -22,6 +22,7 @@
                 {% if current_user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'diary' %}active{% endif %}" href="{{ url_for('diary') }}">Diary</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint in ['user_search', 'public_profile'] %}active{% endif %}" href="{{ url_for('user_search') }}">Users</a></li>
                     <li class="nav-item ms-md-3 ps-md-3 auth-separator">
                         <a class="nav-link logout-link ms-md-2" href="{{ url_for('logout') }}"
                            onclick="return confirm('Are you sure you want to log out?');">Logout</a>

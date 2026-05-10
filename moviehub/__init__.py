@@ -62,6 +62,8 @@ def create_app(config_object=Config):
     app.add_url_rule("/signup", endpoint="signup", view_func=routes.signup, methods=["GET", "POST"])
     app.add_url_rule("/login", endpoint="login", view_func=routes.login, methods=["GET", "POST"])
     app.add_url_rule("/profile", endpoint="profile", view_func=routes.profile)
+    app.add_url_rule("/users", endpoint="user_search", view_func=routes.user_search, methods=["GET"])
+    app.add_url_rule("/users/<username>", endpoint="public_profile", view_func=routes.public_profile, methods=["GET"])
     app.add_url_rule("/logout", endpoint="logout", view_func=routes.logout)
     app.add_url_rule("/diary", endpoint="diary", view_func=routes.diary)
     app.add_url_rule("/api/diary/entries", endpoint="get_diary_entries", view_func=routes.get_diary_entries, methods=["GET"])

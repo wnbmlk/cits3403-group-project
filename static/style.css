@@ -195,6 +195,20 @@ body {
     margin: 0;
 }
 
+.profile-action {
+    margin-top: 0.35rem !important;
+}
+
+.profile-action a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.profile-action a:hover {
+    text-decoration: underline;
+}
+
 .md-card {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -275,6 +289,34 @@ body {
 
 .profile-empty {
     margin: 0;
+}
+
+.user-search-page {
+    max-width: 920px;
+}
+
+.user-search-card,
+.user-search-result {
+    margin-bottom: 1rem;
+}
+
+.user-search-form {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.user-search-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.user-search-row .form-control {
+    flex: 1;
+}
+
+.user-search-result h2 {
+    margin-bottom: 0.4rem;
 }
 
 /* ── Footer ── */
