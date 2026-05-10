@@ -235,6 +235,9 @@ body {
 }
 
 .status-summary-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
     padding: 0.65rem 0;
     border-bottom: 1px solid rgba(217, 226, 236, 0.85);
 }
@@ -248,6 +251,20 @@ body {
     display: block;
     color: var(--text);
     margin-bottom: 0.15rem;
+}
+
+.profile-poster {
+    width: 42px;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(217, 226, 236, 0.95);
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.status-summary-list div {
+    min-width: 0;
 }
 
 .status-summary-list span,

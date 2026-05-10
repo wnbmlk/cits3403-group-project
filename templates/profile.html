@@ -21,8 +21,11 @@
                         <ul class="status-list status-summary-list">
                             {% for item in profile_summary.watched %}
                                 <li>
-                                    <strong>{{ item.title }}</strong>
-                                    <span>{{ item.date_range_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_range_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -39,8 +42,11 @@
                         <ul class="status-list status-summary-list">
                             {% for item in profile_summary.watching %}
                                 <li>
-                                    <strong>{{ item.title }}</strong>
-                                    <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -57,8 +63,11 @@
                         <ul class="status-list status-summary-list">
                             {% for item in profile_summary.watchlist %}
                                 <li>
-                                    <strong>{{ item.title }}</strong>
-                                    <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -75,8 +84,11 @@
                         <ul class="status-list status-summary-list">
                             {% for item in profile_summary.favourites %}
                                 <li>
-                                    <strong>{{ item.title }}</strong>
-                                    <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>

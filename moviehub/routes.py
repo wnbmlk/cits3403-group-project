@@ -260,6 +260,7 @@ def _build_profile_summary(user_id):
             "title": entry.title,
             "genre": entry.genre,
             "status": entry.status,
+            "poster_path": entry.poster_path,
             "date_label": _format_profile_date(entry.date),
             "date_range_label": (
                 f"{_format_profile_date(entry.date)} - {_format_profile_date(entry.date_watched_end)}"
