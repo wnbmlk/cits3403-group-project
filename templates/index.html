@@ -15,54 +15,38 @@
     </div>
 </section>
 
-<!-- Recent Diary Entries -->
+<!-- Recent Diary Entries / Random Movies -->
 <section class="diary-section">
     <div class="container">
-        <h2 class="mb-4">Recent diary entries</h2>
+        {% if current_user.is_authenticated %}
+            <h2 class="mb-4">Your recent diary entries</h2>
+        {% else %}
+            <h2 class="mb-4">Explore movies from our community</h2>
+        {% endif %}
+        
         <div class="row g-3">
-
-            <div class="col-12 col-md-4">
-                <div class="movie-card-item h-100">
-                    <div class="d-flex align-items-start gap-3">
-                        <img class="movie-thumb"
-                             src="https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
-                             alt="Inception poster">
-                        <div>
-                            <h3>Inception</h3>
-                            <p>Watched: last week</p>
+            {% if entries %}
+                {% for entry in entries %}
+                    <div class="col-12 col-md-4">
+                        <div class="movie-card-item h-100">
+                            <div class="d-flex align-items-start gap-3">
+                                <img class="movie-thumb"
+                                     src="{{ entry.poster_path if entry.poster_path else 'https://via.placeholder.com/56x84?text=No+Image' }}"
+                                     alt="{{ entry.title }} poster">
+                                <div>
+                                    <h3>{{ entry.title }}</h3>
+                                    {% if current_user.is_authenticated %}
+                                        <p>{{ entry.status if entry.status else 'Saved' }}</p>
+                                        <p class="entry-date">{{ entry.date.strftime('%d %b %Y') if entry.date else 'No date' }}</p>
+                                    {% else %}
+                                        <p>{{ entry.genre if entry.genre else 'Saved' }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-                <div class="movie-card-item h-100">
-                    <div class="d-flex align-items-start gap-3">
-                        <img class="movie-thumb"
-                             src="https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"
-                             alt="Interstellar poster">
-                        <div>
-                            <h3>Interstellar</h3>
-                            <p>Want to watch</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-                <div class="movie-card-item h-100">
-                    <div class="d-flex align-items-start gap-3">
-                        <img class="movie-thumb"
-                             src="https://image.tmdb.org/t/p/w200/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg"
-                             alt="Breaking Bad poster">
-                        <div>
-                            <h3>Breaking Bad</h3>
-                            <p>Favourite series</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 </section>

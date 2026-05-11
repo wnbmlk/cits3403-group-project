@@ -149,6 +149,14 @@ body {
     font-size: 0.9rem;
 }
 
+.entry-date {
+    font-size: 0.85rem;
+    color: #8b92a1;
+    margin-top: 4px;
+}
+
+
+
 /* ── About page ── */
 .about-box {
     background: var(--panel);

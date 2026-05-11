@@ -1,4 +1,3 @@
-# Route handlers and backend helpers for authentication, diary, search, and profile summaries.
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -140,7 +139,12 @@ def validate_password(password):
 
 
 def home():
-    return render_template("index.html")
+    entries = []
+    if current_user.is_authenticated:
+        entries = DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date.desc()).limit(9).all()
+    else:
+        entries = Movie.query.filter(Movie.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
+    return render_template("index.html", entries=entries)
 
 
 def about():
