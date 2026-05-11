@@ -36,7 +36,10 @@
                                 <div>
                                     <h3>{{ entry.title }}</h3>
                                     {% if current_user.is_authenticated %}
-                                        <p>{{ entry.status if entry.status else 'Saved' }}</p>
+                                        <p>
+                                            {{ entry.status if entry.status else 'Saved' }}
+                                            {% if entry.genre %} • {{ entry.genre }}{% endif %}
+                                        </p>
                                         <p class="entry-date">{{ entry.date.strftime('%d %b %Y') if entry.date else 'No date' }}</p>
                                     {% else %}
                                         <p>{{ entry.genre if entry.genre else 'Saved' }}</p>
