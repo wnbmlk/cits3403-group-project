@@ -7,52 +7,100 @@
     <div class="container">
 
         <div class="md-card profile-header">
-            <h1>{{ user.username }}</h1>
-            <p>{{ user.email }}</p>
-            <p>Movie diary enthusiast. Tracking every movie and series in one place.</p>
+            <h1>{{ profile_user.username }}</h1>
+            {% if is_public %}
+                <p>Public profile summary powered by their diary entries.</p>
+                <p>This page only shows the shared diary summary.</p>
+                <p class="profile-action"><a href="{{ url_for('user_search') }}">Back to user search</a></p>
+            {% else %}
+                <p>Movie diary summary powered by your diary entries.</p>
+                <p>Tracking what you watched, what you are watching, what you want next, and what you love.</p>
+            {% endif %}
         </div>
 
         <div class="row g-3">
 
             <div class="col-12 col-md-6">
                 <div class="md-card">
-                    <h2>Recently Watched</h2>
-                    <ul class="status-list">
-                        <li>Dune: Part Two</li>
-                        <li>Inception</li>
-                        <li>The Dark Knight</li>
-                    </ul>
+                    <h2>Recently Watched <span class="profile-count">{{ profile_summary.counts.watched }}</span></h2>
+                    {% if profile_summary.watched %}
+                        <ul class="status-list status-summary-list">
+                            {% for item in profile_summary.watched %}
+                                <li>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_range_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="profile-empty">No watched entries yet.</p>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="col-12 col-md-6">
                 <div class="md-card">
-                    <h2>Currently Watching</h2>
-                    <ul class="status-list">
-                        <li>Severance</li>
-                        <li>The Last of Us</li>
-                    </ul>
+                    <h2>Currently Watching <span class="profile-count">{{ profile_summary.counts.watching }}</span></h2>
+                    {% if profile_summary.watching %}
+                        <ul class="status-list status-summary-list">
+                            {% for item in profile_summary.watching %}
+                                <li>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="profile-empty">No items are marked as watching.</p>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="col-12 col-md-6">
                 <div class="md-card">
-                    <h2>Want to Watch</h2>
-                    <ul class="status-list">
-                        <li>Interstellar (rewatch)</li>
-                        <li>Oppenheimer</li>
-                    </ul>
+                    <h2>Watchlist <span class="profile-count">{{ profile_summary.counts.watchlist }}</span></h2>
+                    {% if profile_summary.watchlist %}
+                        <ul class="status-list status-summary-list">
+                            {% for item in profile_summary.watchlist %}
+                                <li>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="profile-empty">No titles are in your watchlist.</p>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="col-12 col-md-6">
                 <div class="md-card">
-                    <h2>All-Time Favourites</h2>
-                    <ul class="status-list">
-                        <li>Breaking Bad</li>
-                        <li>Interstellar</li>
-                        <li>The Lord of the Rings</li>
-                    </ul>
+                    <h2>Favourites <span class="profile-count">{{ profile_summary.counts.favourites }}</span></h2>
+                    {% if profile_summary.favourites %}
+                        <ul class="status-list status-summary-list">
+                            {% for item in profile_summary.favourites %}
+                                <li>
+                                    <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
+                                    <div>
+                                        <strong>{{ item.title }}</strong>
+                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="profile-empty">No favourites saved yet.</p>
+                    {% endif %}
                 </div>
             </div>
 

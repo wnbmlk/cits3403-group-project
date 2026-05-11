@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Find Users | Movie Diary{% endblock %}
+
+{% block content %}
+<main class="profile-section">
+    <div class="container user-search-page">
+        <div class="md-card profile-header">
+            <h1>Find Users</h1>
+            <p>Search by username to inspect another user’s public movie diary summary.</p>
+        </div>
+
+        <div class="md-card user-search-card mb-3">
+            <form method="GET" action="{{ url_for('user_search') }}" class="user-search-form">
+                <label for="q" class="form-label">Username</label>
+                <div class="user-search-row">
+                    <input id="q" name="q" type="text" class="form-control" value="{{ query or '' }}" placeholder="Enter username to search" autocomplete="off" required>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+
+        {% if search_error %}
+            <div class="alert alert-warning">{{ search_error }}</div>
+        {% endif %}
+
+        {% if query %}
+            {% if searched_user %}
+                <div class="md-card user-search-result">
+                    <h2>{{ searched_user.username }}</h2>
+                    <p class="mb-3">User exists. You can inspect their public profile summary below.</p>
+                    <a class="btn btn-primary" href="{{ url_for('public_profile', username=searched_user.username) }}">Inspect profile</a>
+                </div>
+            {% elif not search_error %}
+                <div class="alert alert-info">No user found with that username.</div>
+            {% endif %}
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

@@ -195,6 +195,20 @@ body {
     margin: 0;
 }
 
+.profile-action {
+    margin-top: 0.35rem !important;
+}
+
+.profile-action a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.profile-action a:hover {
+    text-decoration: underline;
+}
+
 .md-card {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -210,6 +224,18 @@ body {
     color: var(--text);
 }
 
+.profile-count {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(47, 111, 159, 0.1);
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
 .status-list {
     list-style: disc;
     padding-left: 18px;
@@ -217,8 +243,80 @@ body {
     color: var(--muted);
 }
 
-.status-list li {
-    margin-bottom: 8px;
+.status-summary-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.status-summary-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(217, 226, 236, 0.85);
+}
+
+.status-summary-list li:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.status-summary-list strong {
+    display: block;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+}
+
+.profile-poster {
+    width: 42px;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(217, 226, 236, 0.95);
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.status-summary-list div {
+    min-width: 0;
+}
+
+.status-summary-list span,
+.profile-empty {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.profile-empty {
+    margin: 0;
+}
+
+.user-search-page {
+    max-width: 920px;
+}
+
+.user-search-card,
+.user-search-result {
+    margin-bottom: 1rem;
+}
+
+.user-search-form {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.user-search-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.user-search-row .form-control {
+    flex: 1;
+}
+
+.user-search-result h2 {
+    margin-bottom: 0.4rem;
 }
 
 /* ── Footer ── */

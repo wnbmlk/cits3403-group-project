@@ -1,9 +1,10 @@
+# Route handlers and backend helpers for authentication, diary, search, and profile summaries.
 from .movie_data import MOVIES, get_movie
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from flask import flash, redirect, render_template, request, url_for
+from flask import current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -205,6 +206,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
         login_user(user)
+        session["boot_id"] = current_app.config.get("SESSION_BOOT_ID")
         return redirect(url_for("profile"))
 
     return render_template("signup.html")
@@ -214,14 +216,15 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        remember = bool(request.form.get("remember"))
 
         user = None
         if username:
             user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            login_user(user, remember=remember)
+            session.permanent = False
+            login_user(user, remember=False)
+            session["boot_id"] = current_app.config.get("SESSION_BOOT_ID")
             return redirect(url_for("profile"))
 
         flash("Invalid credentials", "danger")
@@ -230,14 +233,112 @@ def login():
     return render_template("login.html")
 
 
+def _entry_status_tokens(entry):
+    return set(_normalize_statuses(entry.status))
+
+
+def _entry_has_status(entry, status_name):
+    return status_name in _entry_status_tokens(entry)
+
+
+def _format_profile_date(entry_date):
+    if not entry_date:
+        return "Unknown date"
+
+    return entry_date.strftime("%d %b %Y")
+
+
+def _build_profile_summary(user_id):
+    entries = DiaryEntry.query.filter_by(user_id=user_id).order_by(DiaryEntry.date.desc()).all()
+
+    watched_entries = []
+    watching_entries = []
+    watchlist_entries = []
+    favourite_entries = []
+
+    for entry in entries:
+        item = {
+            "id": entry.id,
+            "title": entry.title,
+            "genre": entry.genre,
+            "status": entry.status,
+            "poster_path": entry.poster_path,
+            "date_label": _format_profile_date(entry.date),
+            "date_range_label": (
+                f"{_format_profile_date(entry.date)} - {_format_profile_date(entry.date_watched_end)}"
+                if entry.date_watched_end
+                else _format_profile_date(entry.date)
+            ),
+        }
+
+        if _entry_has_status(entry, "Watched"):
+            watched_entries.append(item)
+        if _entry_has_status(entry, "Watching"):
+            watching_entries.append(item)
+        if _entry_has_status(entry, "Watchlist"):
+            watchlist_entries.append(item)
+        if _entry_has_status(entry, "Favourite"):
+            favourite_entries.append(item)
+
+    return {
+        "watched": watched_entries[:5],
+        "watching": watching_entries[:5],
+        "watchlist": watchlist_entries[:5],
+        "favourites": favourite_entries[:10],
+        "counts": {
+            "watched": len(watched_entries),
+            "watching": len(watching_entries),
+            "watchlist": len(watchlist_entries),
+            "favourites": len(favourite_entries),
+        },
+    }
+
+
+def _find_user_by_username(username):
+    normalized_username = (username or "").strip()
+    if not normalized_username:
+        return None
+
+    return User.query.filter(db.func.lower(User.username) == normalized_username.lower()).first()
+
+
 @login_required
 def profile():
-    return render_template("profile.html", user=current_user)
+    profile_summary = _build_profile_summary(current_user.id)
+    return render_template(
+        "profile.html",
+        profile_user=current_user,
+        profile_summary=profile_summary,
+        is_public=False,
+    )
+
+
+@login_required
+def user_search():
+    query = (request.args.get("q") or "").strip()
+    searched_user = _find_user_by_username(query) if query else None
+    return render_template("users_search.html", query=query, searched_user=searched_user)
+
+
+@login_required
+def public_profile(username):
+    profile_user = _find_user_by_username(username)
+    if not profile_user:
+        return render_template("users_search.html", query=username, searched_user=None, search_error="User not found"), 404
+
+    profile_summary = _build_profile_summary(profile_user.id)
+    return render_template(
+        "profile.html",
+        profile_user=profile_user,
+        profile_summary=profile_summary,
+        is_public=True,
+    )
 
 
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for("home"))
 
 
