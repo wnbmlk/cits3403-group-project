@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 from .extensions import db
-from .models import DiaryEntry, Movie, User
+from .models import DiaryEntry, Movie, User, _display_poster_path
 
 
 ALLOWED_STATUS_MAP = {
@@ -20,6 +20,13 @@ ALLOWED_STATUS_MAP = {
 }
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+
+
+def _slugify(value):
+    normalized = "".join(character.lower() if character.isalnum() else "-" for character in value)
+    while "--" in normalized:
+        normalized = normalized.replace("--", "-")
+    return normalized.strip("-")
 
 
 def _normalize_statuses(values):
@@ -97,12 +104,13 @@ def _save_uploaded_poster(file_storage):
 
 
 def _upsert_movie_catalog_entry(title, genre=None, poster_path=None, media_type=None):
+    resolved_poster_path = _resolve_tmdb_poster_path(title, poster_path)
     existing_movie = Movie.query.filter(db.func.lower(Movie.title) == title.lower()).first()
     if existing_movie:
         if genre and not existing_movie.genre:
             existing_movie.genre = genre
-        if poster_path and not existing_movie.poster_path:
-            existing_movie.poster_path = poster_path
+        if resolved_poster_path and (not existing_movie.poster_path or existing_movie.poster_path.endswith(".svg")):
+            existing_movie.poster_path = resolved_poster_path
         if media_type and not existing_movie.media_type:
             existing_movie.media_type = media_type
         return
@@ -112,9 +120,20 @@ def _upsert_movie_catalog_entry(title, genre=None, poster_path=None, media_type=
             title=title,
             media_type=media_type,
             genre=genre,
-            poster_path=poster_path,
+            poster_path=resolved_poster_path,
         )
     )
+
+
+def _resolve_tmdb_poster_path(title, fallback_path=None):
+    slug = _slugify(title)
+    tmdb_path = f"/static/images/posters/tmdb/{slug}.jpg"
+    tmdb_file = Path(current_app.static_folder) / "images" / "posters" / "tmdb" / f"{slug}.jpg"
+
+    if tmdb_file.exists():
+        return tmdb_path
+
+    return fallback_path
 
 
 def validate_password(password):
@@ -143,9 +162,29 @@ def validate_password(password):
 
 def home():
     if current_user.is_authenticated:
-        entries = DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date.desc()).limit(9).all()
+        entries = [
+            {
+                "title": entry.title,
+                "status": entry.status,
+                "media_type": entry.media_type,
+                "genre": entry.genre,
+                "poster_path": _display_poster_path(entry.title, entry.poster_path),
+                "date": entry.date,
+            }
+            for entry in DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date.desc()).limit(9).all()
+        ]
     else:
-        entries = DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
+        entries = [
+            {
+                "title": entry.title,
+                "status": entry.status,
+                "media_type": entry.media_type,
+                "genre": entry.genre,
+                "poster_path": _display_poster_path(entry.title, entry.poster_path),
+                "date": entry.date,
+            }
+            for entry in DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
+        ]
     return render_template("index.html", entries=entries)
 
 
@@ -268,7 +307,7 @@ def _build_profile_summary(user_id):
             "media_type": entry.media_type,
             "genre": entry.genre,
             "status": entry.status,
-            "poster_path": entry.poster_path,
+            "poster_path": _display_poster_path(entry.title, entry.poster_path),
             "date_label": _format_profile_date(entry.date),
             "date_range_label": (
                 f"{_format_profile_date(entry.date)} - {_format_profile_date(entry.date_watched_end)}"
@@ -391,7 +430,7 @@ def create_diary_entry():
         if date_error:
             return {"error": date_error}, 400
 
-    poster_path = (data.get("poster_path") or "").strip() or None
+    poster_path = _resolve_tmdb_poster_path(title, (data.get("poster_path") or "").strip() or None)
 
     # Try to find matching Movie to extract media_type
     matching_movie = Movie.query.filter(db.func.lower(Movie.title) == title.lower()).first()
@@ -444,7 +483,7 @@ def update_diary_entry(entry_id):
             return {"error": genre_error}, 400
         entry.genre = genre
     if "poster_path" in data:
-        entry.poster_path = (data.get("poster_path") or "").strip() or None
+        entry.poster_path = _resolve_tmdb_poster_path(entry.title, (data.get("poster_path") or "").strip() or None)
     if "date" in data:
         date, date_error = _parse_date_or_today(data.get("date"))
         if date_error:
@@ -503,7 +542,7 @@ def create_manual_diary_entry():
         status=", ".join(statuses),
         media_type=media_type,
         genre=genre,
-        poster_path=poster_path,
+        poster_path=poster_path or _resolve_tmdb_poster_path(title),
         date=date,
         date_watched_end=date_watched_end,
         user_id=current_user.id,
