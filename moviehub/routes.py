@@ -96,18 +96,21 @@ def _save_uploaded_poster(file_storage):
     return f"/static/images/posters/uploads/{safe_name}", None
 
 
-def _upsert_movie_catalog_entry(title, genre=None, poster_path=None):
+def _upsert_movie_catalog_entry(title, genre=None, poster_path=None, media_type=None):
     existing_movie = Movie.query.filter(db.func.lower(Movie.title) == title.lower()).first()
     if existing_movie:
         if genre and not existing_movie.genre:
             existing_movie.genre = genre
         if poster_path and not existing_movie.poster_path:
             existing_movie.poster_path = poster_path
+        if media_type and not existing_movie.media_type:
+            existing_movie.media_type = media_type
         return
 
     db.session.add(
         Movie(
             title=title,
+            media_type=media_type,
             genre=genre,
             poster_path=poster_path,
         )
@@ -263,6 +266,7 @@ def _build_profile_summary(user_id):
         item = {
             "id": entry.id,
             "title": entry.title,
+            "media_type": entry.media_type,
             "genre": entry.genre,
             "status": entry.status,
             "poster_path": entry.poster_path,
@@ -390,9 +394,14 @@ def create_diary_entry():
 
     poster_path = (data.get("poster_path") or "").strip() or None
 
+    # Try to find matching Movie to extract media_type
+    matching_movie = Movie.query.filter(db.func.lower(Movie.title) == title.lower()).first()
+    media_type = matching_movie.media_type if matching_movie else None
+
     entry = DiaryEntry(
         title=title,
         status=", ".join(statuses),
+        media_type=media_type,
         genre=genre,
         poster_path=poster_path,
         date=date,
@@ -401,7 +410,7 @@ def create_diary_entry():
     )
 
     db.session.add(entry)
-    _upsert_movie_catalog_entry(title=title, genre=genre, poster_path=poster_path)
+    _upsert_movie_catalog_entry(title=title, genre=genre, poster_path=poster_path, media_type=media_type)
     db.session.commit()
 
     return entry.to_dict(), 201
@@ -486,9 +495,14 @@ def create_manual_diary_entry():
     if upload_error:
         return {"error": upload_error}, 400
 
+    # Try to find matching Movie to extract media_type
+    matching_movie = Movie.query.filter(db.func.lower(Movie.title) == title.lower()).first()
+    media_type = matching_movie.media_type if matching_movie else None
+
     entry = DiaryEntry(
         title=title,
         status=", ".join(statuses),
+        media_type=media_type,
         genre=genre,
         poster_path=poster_path,
         date=date,
@@ -497,7 +511,7 @@ def create_manual_diary_entry():
     )
 
     db.session.add(entry)
-    _upsert_movie_catalog_entry(title=title, genre=genre, poster_path=poster_path)
+    _upsert_movie_catalog_entry(title=title, genre=genre, poster_path=poster_path, media_type=media_type)
     db.session.commit()
 
     return entry.to_dict(), 201

@@ -38,11 +38,15 @@
                                     {% if current_user.is_authenticated %}
                                         <p>
                                             {{ entry.status if entry.status else 'Saved' }}
+                                            {% if entry.media_type %} • {{ entry.media_type }}{% endif %}
                                             {% if entry.genre %} • {{ entry.genre }}{% endif %}
                                         </p>
                                         <p class="entry-date">{{ entry.date.strftime('%d %b %Y') if entry.date else 'No date' }}</p>
                                     {% else %}
-                                        <p>{{ entry.genre if entry.genre else 'Saved' }}</p>
+                                        <p>
+                                            {% if entry.media_type %}{{ entry.media_type }}{% endif %}
+                                            {% if entry.genre %} • {{ entry.genre }}{% else %}Saved{% endif %}
+                                        </p>
                                     {% endif %}
                                 </div>
                             </div>

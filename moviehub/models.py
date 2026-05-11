@@ -14,6 +14,7 @@ class User(UserMixin, db.Model):
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
+    media_type = db.Column(db.String(50), nullable=True)
     genre = db.Column(db.String(80), nullable=True)
     status = db.Column(db.String(50), nullable=True)
     poster_path = db.Column(db.String(255), nullable=True)
@@ -23,6 +24,7 @@ class Movie(db.Model):
         return {
             "id": self.id,
             "title": self.title,
+            "media_type": self.media_type,
             "genre": self.genre,
             "status": self.status,
             "poster_path": self.poster_path,
@@ -43,6 +45,7 @@ class DiaryEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(50), nullable=False)
+    media_type = db.Column(db.String(50), nullable=True)
     genre = db.Column(db.String(100), nullable=True)
     poster_path = db.Column(db.String(255), nullable=True)
     date = db.Column(db.DateTime, nullable=False)
@@ -57,6 +60,7 @@ class DiaryEntry(db.Model):
             "id": self.id,
             "title": self.title,
             "status": self.status,
+            "media_type": self.media_type,
             "genre": self.genre,
             "poster_path": self.poster_path,
             "date": self.date.isoformat(),
