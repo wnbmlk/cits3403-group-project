@@ -4,64 +4,39 @@
 
 {% block content %}
 
-<!-- Hero -->
 <section class="hero-section">
     <div class="container">
         <h1>Movie Diary</h1>
-        <p class="desc">Save what you watched, keep a watchlist, and view selected public profile activity.</p>
+        <p class="desc">Recommended classic movies to watch, save, and review in your diary.</p>
         <div class="d-flex flex-wrap gap-2 mt-4">
             <a class="btn btn-primary" href="{{ url_for('diary') }}">Explore diary</a>
         </div>
     </div>
 </section>
 
-<!-- Recent Diary Entries -->
 <section class="diary-section">
     <div class="container">
-        <h2 class="mb-4">Recent diary entries</h2>
+        <h2 class="mb-4">Recommended movies to watch</h2>
         <div class="row g-3">
 
+            {% for movie in movies %}
             <div class="col-12 col-md-4">
-                <div class="movie-card-item h-100">
-                    <div class="d-flex align-items-start gap-3">
-                        <img class="movie-thumb"
-                             src="https://image.tmdb.org/t/p/w200/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
-                             alt="Inception poster">
-                        <div>
-                            <h3>Inception</h3>
-                            <p>Watched: last week</p>
+                <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" class="text-decoration-none">
+                    <div class="movie-card-item h-100">
+                        <div class="d-flex align-items-start gap-3">
+                            <img class="movie-thumb"
+                                 src="{{ movie.poster }}"
+                                 alt="{{ movie.title }} poster">
+                            <div>
+                                <h3>{{ movie.title }} ({{ movie.year }})</h3>
+                                <p>{{ movie.summary[:90] }}...</p>
+                                <p><strong>Rating:</strong> {{ movie.rating }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
-
-            <div class="col-12 col-md-4">
-                <div class="movie-card-item h-100">
-                    <div class="d-flex align-items-start gap-3">
-                        <img class="movie-thumb"
-                             src="https://image.tmdb.org/t/p/w200/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"
-                             alt="Interstellar poster">
-                        <div>
-                            <h3>Interstellar</h3>
-                            <p>Want to watch</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-4">
-                <div class="movie-card-item h-100">
-                    <div class="d-flex align-items-start gap-3">
-                        <img class="movie-thumb"
-                             src="https://image.tmdb.org/t/p/w200/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg"
-                             alt="Breaking Bad poster">
-                        <div>
-                            <h3>Breaking Bad</h3>
-                            <p>Favourite series</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
 
         </div>
     </div>
