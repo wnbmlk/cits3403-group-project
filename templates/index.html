@@ -4,56 +4,40 @@
 
 {% block content %}
 
-<!-- Hero -->
 <section class="hero-section">
     <div class="container">
         <h1>Movie Diary</h1>
-        <p class="desc">Save what you watched, keep a watchlist, and view selected public profile activity.</p>
+        <p class="desc">Recommended classic movies to watch, save, and review in your diary.</p>
         <div class="d-flex flex-wrap gap-2 mt-4">
             <a class="btn btn-primary" href="{{ url_for('diary') }}">Explore diary</a>
         </div>
     </div>
 </section>
 
-<!-- Recent Diary Entries / Random Movies -->
 <section class="diary-section">
     <div class="container">
-        {% if current_user.is_authenticated %}
-            <h2 class="mb-4">Your recent diary entries</h2>
-        {% else %}
-            <h2 class="mb-4">Explore movies from our community</h2>
-        {% endif %}
-        
+        <h2 class="mb-4">Recommended movies to watch</h2>
         <div class="row g-3">
-            {% if entries %}
-                {% for entry in entries %}
-                    <div class="col-12 col-md-4">
-                        <div class="movie-card-item h-100">
-                            <div class="d-flex align-items-start gap-3">
-                                <img class="movie-thumb"
-                                     src="{{ entry.poster_path if entry.poster_path else 'https://via.placeholder.com/56x84?text=No+Image' }}"
-                                     alt="{{ entry.title }} poster">
-                                <div>
-                                    <h3>{{ entry.title }}</h3>
-                                    {% if current_user.is_authenticated %}
-                                        <p>
-                                            {{ entry.status if entry.status else 'Saved' }}
-                                            {% if entry.media_type %} • {{ entry.media_type }}{% endif %}
-                                            {% if entry.genre %} • {{ entry.genre }}{% endif %}
-                                        </p>
-                                        <p class="entry-date">{{ entry.date.strftime('%d %b %Y') if entry.date else 'No date' }}</p>
-                                    {% else %}
-                                        <p>
-                                            {% if entry.media_type %}{{ entry.media_type }}{% endif %}
-                                            {% if entry.genre %} • {{ entry.genre }}{% else %}Saved{% endif %}
-                                        </p>
-                                    {% endif %}
-                                </div>
+
+            {% for movie in movies %}
+            <div class="col-12 col-md-4">
+                <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" class="text-decoration-none">
+                    <div class="movie-card-item h-100">
+                        <div class="d-flex align-items-start gap-3">
+                            <img class="movie-thumb"
+                                 src="{{ movie.poster }}"
+                                 alt="{{ movie.title }} poster">
+                            <div>
+                                <h3>{{ movie.title }} ({{ movie.year }})</h3>
+                                <p>{{ movie.summary[:90] }}...</p>
+                                <p><strong>Rating:</strong> {{ movie.rating }}</p>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
-            {% endif %}
+                </a>
+            </div>
+            {% endfor %}
+
         </div>
     </div>
 </section>
