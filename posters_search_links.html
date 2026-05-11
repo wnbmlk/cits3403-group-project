@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Poster Search Links — Movie Diary</title>
+  <style>
+    body{font-family:Segoe UI,Roboto,Arial,Helvetica,sans-serif;margin:24px;background:#f7fafc;color:#0f172a}
+    h1,h2{margin:8px 0}
+    .group{margin-bottom:20px}
+    ul{list-style:none;padding:0}
+    li{margin:8px 0;padding:8px;background:#fff;border:1px solid #e6eef8;border-radius:6px}
+    a{margin-right:12px}
+    .title{font-weight:600}
+    .note{color:#475569;font-size:0.95rem}
+  </style>
+</head>
+<body>
+  <h1>Poster Search Links</h1>
+  <p class="note">Click a link to open a search tab. Use the TMDB result or Google Images to save posters locally into <code>static/images/posters/</code>.</p>
+
+  <div class="group">
+    <h2>Movies & TV</h2>
+    <ul id="movies-list"></ul>
+  </div>
+
+  <div class="group">
+    <h2>Anime</h2>
+    <ul id="anime-list"></ul>
+  </div>
+
+<script>
+// Lists imported from seed_demo_data
+const MOVIES = [
+"The Shawshank Redemption",
+"The Godfather",
+"The Godfather Part II",
+"The Dark Knight",
+"12 Angry Men",
+"Schindler's List",
+"Pulp Fiction",
+"The Lord of the Rings: The Return of the King",
+"The Good, the Bad and the Ugly",
+"Fight Club",
+"Forrest Gump",
+"Inception",
+"The Matrix",
+"Goodfellas",
+"Seven Samurai",
+"Parasite",
+"Interstellar",
+"City of God",
+"The Silence of the Lambs",
+"Saving Private Ryan",
+"Spirited Away",
+"Whiplash",
+"The Green Mile",
+"Se7en",
+"Gladiator",
+"Casablanca",
+"The Departed",
+"The Prestige",
+"The Pianist",
+"Back to the Future",
+"Apocalypse Now",
+"Alien",
+"Terminator 2: Judgment Day",
+"Raiders of the Lost Ark",
+"The Lion King",
+"The Usual Suspects",
+"Memento",
+"Django Unchained",
+"Toy Story",
+"Joker",
+"Avengers: Endgame",
+"The Truman Show",
+"Blade Runner 2049",
+"No Country for Old Men",
+"Oldboy",
+"Come and See",
+"La La Land",
+"There Will Be Blood",
+"Eternal Sunshine of the Spotless Mind",
+"The Lord of the Rings: The Fellowship of the Ring"
+];
+
+const TV_SERIES = [
+"Breaking Bad","The Wire","The Sopranos","Band of Brothers","Chernobyl","Better Call Saul","Game of Thrones","The Office","Friends","Succession","Mad Men","Fleabag","True Detective","Sherlock","Dark","Stranger Things","The Bear","Arcane","Attack on Titan","The Last of Us","Severance","Black Mirror","Mindhunter","Narcos","Peaky Blinders","House","The Boys","BoJack Horseman","Rick and Morty","Mr. Robot","The Crown","Lost","The Leftovers","Six Feet Under","The Mandalorian","Dexter","Ozark","The Haunting of Hill House","Prison Break","Avatar: The Last Airbender","The West Wing","Twin Peaks","The X-Files","Fargo","The Queen's Gambit","When They See Us","Cosmos","Blue Eye Samurai","Shōgun","The Simpsons"
+];
+
+const ANIME = [
+"Fullmetal Alchemist: Brotherhood","Attack on Titan","Death Note","Steins;Gate","Hunter x Hunter","One Piece","Naruto","Naruto: Shippuden","Bleach","Demon Slayer: Kimetsu no Yaiba","Jujutsu Kaisen","Vinland Saga","Monster","Code Geass","Cowboy Bebop","Neon Genesis Evangelion","Frieren: Beyond Journey's End","Mob Psycho 100","One Punch Man","Haikyuu!!","Kaguya-sama: Love Is War","Your Lie in April","Clannad: After Story","Made in Abyss","Psycho-Pass","Samurai Champloo","Parasyte: The Maxim","Re:Zero − Starting Life in Another World","Gintama","Berserk","JoJo's Bizarre Adventure","Chainsaw Man","Dragon Ball Z","Spy × Family","Black Clover","Mushoku Tensei: Jobless Reincarnation","Erased","Bocchi the Rock!","Blue Lock","86","Spirited Away","Your Name","A Silent Voice","Princess Mononoke","Akira","Howl's Moving Castle","Grave of the Fireflies","Perfect Blue","Ghost in the Shell","The Boy and the Heron"
+];
+
+function makeLinks(title) {
+  const tmdb = 'https://www.themoviedb.org/search?query=' + encodeURIComponent(title);
+  const google = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(title + ' poster');
+  const bing = 'https://www.bing.com/images/search?q=' + encodeURIComponent(title + ' poster');
+  return {tmdb, google, bing};
+}
+
+function addList(targetId, items) {
+  const ul = document.getElementById(targetId);
+  items.forEach((t)=>{
+    const li = document.createElement('li');
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'title';
+    titleSpan.textContent = t;
+    li.appendChild(titleSpan);
+
+    const links = makeLinks(t);
+    const a1 = document.createElement('a');
+    a1.href = links.tmdb; a1.target='_blank'; a1.rel='noopener noreferrer'; a1.textContent='TMDB';
+    const a2 = document.createElement('a');
+    a2.href = links.google; a2.target='_blank'; a2.rel='noopener noreferrer'; a2.textContent='Google Images';
+    const a3 = document.createElement('a');
+    a3.href = links.bing; a3.target='_blank'; a3.rel='noopener noreferrer'; a3.textContent='Bing Images';
+
+    li.appendChild(document.createTextNode(' '));
+    li.appendChild(a1);
+    li.appendChild(a2);
+    li.appendChild(a3);
+    ul.appendChild(li);
+  });
+}
+
+addList('movies-list', MOVIES.concat(TV_SERIES));
+addList('anime-list', ANIME);
+</script>
+</body>
+</html>

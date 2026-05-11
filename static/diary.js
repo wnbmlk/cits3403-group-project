@@ -60,6 +60,7 @@ function loadCatalog() {
 
 const catalog = loadCatalog().map((movie) => ({
     title: movie.title,
+    media_type: movie.media_type || "",
     genre: movie.genre || "",
     poster: movie.poster_path || "/static/images/posters/placeholder.svg",
 }));
@@ -296,7 +297,7 @@ async function renderTimeline() {
         if (watchDate) {
             watchDate.textContent = item.dateLabel || "Watched date not set";
         }
-        status.textContent = `${item.status}${item.genre ? ` • ${item.genre}` : ""}`;
+        status.textContent = `${item.status}${item.media_type ? ` • ${item.media_type}` : ""}${item.genre ? ` • ${item.genre}` : ""}`;
         removeButton.addEventListener("click", () => removeMovieFromTimeline(item.id));
 
         timelineTrack.appendChild(movieNode);
@@ -340,11 +341,12 @@ function renderResults(results) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "search-result";
+        const genreText = movie.genre ? `${movie.media_type ? `${movie.media_type} • ` : ""}${movie.genre}` : (movie.media_type || "Genre not set");
         button.innerHTML = `
             <img src="${movie.poster}" alt="${movie.title} poster">
             <div>
                 <h3>${movie.title}</h3>
-                <p>${movie.genre || "Genre not set"}</p>
+                <p>${genreText}</p>
             </div>
         `;
         button.addEventListener("click", () => addMovieToTimeline(movie, button));

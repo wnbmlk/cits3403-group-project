@@ -30,7 +30,7 @@
                                     <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
                                     <div>
                                         <strong>{{ item.title }}</strong>
-                                        <span>{{ item.date_range_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                        <span>{{ item.date_range_label }}{% if item.media_type %} • {{ item.media_type }}{% endif %}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
                                     </div>
                                 </li>
                             {% endfor %}
@@ -51,7 +51,7 @@
                                     <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
                                     <div>
                                         <strong>{{ item.title }}</strong>
-                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                        <span>{{ item.date_label }}{% if item.media_type %} • {{ item.media_type }}{% endif %}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
                                     </div>
                                 </li>
                             {% endfor %}
@@ -72,7 +72,7 @@
                                     <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
                                     <div>
                                         <strong>{{ item.title }}</strong>
-                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                        <span>{{ item.date_label }}{% if item.media_type %} • {{ item.media_type }}{% endif %}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
                                     </div>
                                 </li>
                             {% endfor %}
@@ -93,7 +93,7 @@
                                     <img class="profile-poster" src="{{ item.poster_path or '/static/images/posters/placeholder.svg' }}" alt="{{ item.title }} poster">
                                     <div>
                                         <strong>{{ item.title }}</strong>
-                                        <span>{{ item.date_label }}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
+                                        <span>{{ item.date_label }}{% if item.media_type %} • {{ item.media_type }}{% endif %}{% if item.genre %} • {{ item.genre }}{% endif %}</span>
                                     </div>
                                 </li>
                             {% endfor %}
