@@ -444,30 +444,34 @@ def seed_entries(user: User, records: list[dict], status: str, start_date: datet
         )
 
 
+def seed_demo_data(generate_posters: bool = True) -> None:
+    combined_movies = MOVIES + TV_SERIES
+    movie_records = expand_records(combined_movies, "movie", len(combined_movies))
+    anime_records = expand_records(ANIME, "anime", len(ANIME), start_index=len(combined_movies))
+    all_records = movie_records + anime_records
+    if generate_posters:
+        write_posters(all_records)
+
+    for record in movie_records:
+        record["status"] = "Watched"
+    for record in anime_records:
+        record["status"] = "Watching"
+
+    seed_movies(all_records)
+
+    demo_user = ensure_demo_user()
+    seed_entries(demo_user, movie_records, "Watched", datetime(2024, 1, 1))
+    seed_entries(demo_user, anime_records, "Watching", datetime(2024, 5, 1))
+
+    db.session.commit()
+    print("Seeded demo data: 100 movies and 50 anime entries.")
+
+
 def main() -> None:
     app = create_app()
     with app.app_context():
         db.create_all()
-
-        combined_movies = MOVIES + TV_SERIES
-        movie_records = expand_records(combined_movies, "movie", len(combined_movies))
-        anime_records = expand_records(ANIME, "anime", len(ANIME), start_index=len(combined_movies))
-        all_records = movie_records + anime_records
-        write_posters(all_records)
-
-        for record in movie_records:
-            record["status"] = "Watched"
-        for record in anime_records:
-            record["status"] = "Watching"
-
-        seed_movies(all_records)
-
-        demo_user = ensure_demo_user()
-        seed_entries(demo_user, movie_records, "Watched", datetime(2024, 1, 1))
-        seed_entries(demo_user, anime_records, "Watching", datetime(2024, 5, 1))
-
-        db.session.commit()
-        print("Seeded demo data: 100 movies and 50 anime entries.")
+        seed_demo_data(generate_posters=True)
 
 
 if __name__ == "__main__":
