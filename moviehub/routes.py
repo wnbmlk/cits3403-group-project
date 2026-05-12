@@ -173,7 +173,21 @@ def home():
             }
             for entry in DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date.desc()).limit(9).all()
         ]
+        feed_mode = "personal" if entries else "community"
+        if not entries:
+            entries = [
+                {
+                    "title": entry.title,
+                    "status": entry.status,
+                    "media_type": entry.media_type,
+                    "genre": entry.genre,
+                    "poster_path": _display_poster_path(entry.title, entry.poster_path),
+                    "date": entry.date,
+                }
+                for entry in DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
+            ]
     else:
+        feed_mode = "community"
         entries = [
             {
                 "title": entry.title,
@@ -185,7 +199,7 @@ def home():
             }
             for entry in DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
         ]
-    return render_template("index.html", entries=entries)
+    return render_template("index.html", entries=entries, feed_mode=feed_mode)
 
 
 def about():

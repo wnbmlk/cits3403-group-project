@@ -18,7 +18,7 @@
 <!-- Recent Diary Entries / Random Movies -->
 <section class="diary-section">
     <div class="container">
-        {% if current_user.is_authenticated %}
+        {% if feed_mode == 'personal' %}
             <h2 class="mb-4">Your recent diary entries</h2>
         {% else %}
             <h2 class="mb-4">Explore movies from our community</h2>

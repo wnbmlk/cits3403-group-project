@@ -81,6 +81,9 @@ def _ensure_diary_entry_poster_column():
         return
 
     inspector = inspect(engine)
+    if "diary_entry" not in inspector.get_table_names():
+        return
+
     columns = {column["name"] for column in inspector.get_columns("diary_entry")}
     if "poster_path" in columns:
         return
@@ -119,6 +122,9 @@ def _ensure_diary_entry_date_watched_end_column():
         return
 
     inspector = inspect(engine)
+    if "diary_entry" not in inspector.get_table_names():
+        return
+
     columns = {column["name"] for column in inspector.get_columns("diary_entry")}
     if "date_watched_end" in columns:
         return
