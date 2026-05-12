@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ movie.title }} | Movie Diary{% endblock %}
+
+{% block content %}
+
+<section class="diary-section">
+    <div class="container">
+        <a href="{{ url_for('home') }}" class="btn-back">← Back to recommendations</a>
+
+        <div class="about-box mt-4">
+            <div class="row g-4 align-items-start">
+                <div class="col-12 col-md-4">
+                    <img src="{{ movie.poster }}"
+                         alt="{{ movie.title }} poster"
+                         class="img-fluid rounded">
+                </div>
+
+                <div class="col-12 col-md-8">
+                    <h1>{{ movie.title }} ({{ movie.year }})</h1>
+                    <p><strong>Recommended rating:</strong> {{ movie.rating }}</p>
+
+                    <h2 class="mt-4">Introduction</h2>
+                    <p>{{ movie.summary }}</p>
+
+                    <h2 class="mt-4">Why watch this?</h2>
+                    <p>
+                        This movie is included as a recommended title because it is highly rated,
+                        widely discussed, and suitable for users who want to build a meaningful
+                        movie diary. After watching it, users can record their own thoughts,
+                        compare it with other films, and later add a personal review.
+                    </p>
+
+                    <a class="btn btn-primary mt-3" href="{{ url_for('diary') }}">Go to diary</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,3 +1,5 @@
+# Route handlers and backend helpers for authentication, diary, search, and profile summaries.
+from .movie_data import MOVIES, get_movie
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -161,45 +163,7 @@ def validate_password(password):
 
 
 def home():
-    if current_user.is_authenticated:
-        entries = [
-            {
-                "title": entry.title,
-                "status": entry.status,
-                "media_type": entry.media_type,
-                "genre": entry.genre,
-                "poster_path": _display_poster_path(entry.title, entry.poster_path),
-                "date": entry.date,
-            }
-            for entry in DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date.desc()).limit(9).all()
-        ]
-        feed_mode = "personal" if entries else "community"
-        if not entries:
-            entries = [
-                {
-                    "title": entry.title,
-                    "status": entry.status,
-                    "media_type": entry.media_type,
-                    "genre": entry.genre,
-                    "poster_path": _display_poster_path(entry.title, entry.poster_path),
-                    "date": entry.date,
-                }
-                for entry in DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
-            ]
-    else:
-        feed_mode = "community"
-        entries = [
-            {
-                "title": entry.title,
-                "status": entry.status,
-                "media_type": entry.media_type,
-                "genre": entry.genre,
-                "poster_path": _display_poster_path(entry.title, entry.poster_path),
-                "date": entry.date,
-            }
-            for entry in DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
-        ]
-    return render_template("index.html", entries=entries, feed_mode=feed_mode)
+    return render_template("index.html", movies=MOVIES)
 
 
 def about():
@@ -584,3 +548,11 @@ def delete_diary_entry(entry_id):
     db.session.commit()
 
     return {"success": True}
+
+def movie_detail(movie_id):
+    movie = get_movie(movie_id)
+
+    if movie is None:
+        return "Movie not found", 404
+
+    return render_template("movie_detail.html", movie=movie)
