@@ -82,7 +82,6 @@ def _ensure_diary_entry_poster_column():
         return
 
     inspector = inspect(engine)
-
     if "diary_entry" not in inspector.get_table_names():
         return
 
@@ -140,3 +139,20 @@ def _ensure_movie_columns():
     with engine.begin() as connection:
         for statement in statements:
             connection.execute(text(statement))
+
+
+def _ensure_diary_entry_date_watched_end_column():
+    engine = db.engine
+    if engine.dialect.name != "sqlite":
+        return
+
+    inspector = inspect(engine)
+    if "diary_entry" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("diary_entry")}
+    if "date_watched_end" in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE diary_entry ADD COLUMN date_watched_end DATETIME"))
