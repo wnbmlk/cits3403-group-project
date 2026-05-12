@@ -1,4 +1,4 @@
-"""seed demo data
+"""Ensure diary and movie schema matches current models
 
 Revision ID: 7c1b3f0d9f5c
 Revises: 2d44a4220600
@@ -8,8 +8,6 @@ Create Date: 2026-05-12 00:00:00.000000
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import inspect
-
-from seed_demo_data import seed_demo_data
 
 
 # revision identifiers, used by Alembic.
@@ -47,8 +45,6 @@ def upgrade():
             op.add_column("diary_entry", sa.Column("poster_path", sa.String(length=255), nullable=True))
         if "date_watched_end" not in diary_columns:
             op.add_column("diary_entry", sa.Column("date_watched_end", sa.DateTime(), nullable=True))
-
-    seed_demo_data(generate_posters=True)
 
 
 def downgrade():

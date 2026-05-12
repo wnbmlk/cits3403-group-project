@@ -37,19 +37,19 @@ The application lets users log in, save the movies and series they have watched,
 
 ## Technologies
 
-- HTML
-- CSS
-- JavaScript
-- Flask
+- **Frontend:** HTML, CSS, JavaScript
+- **Backend:** Flask (Python)
+- **CSS Framework:** Bootstrap
+- **Database:** SQLite (via SQLAlchemy ORM)
 
 ## Environment Variables
 
 Create a local `.env` file based on `.env.example` and keep it out of Git.
 
-- `SECRET_KEY`: Flask session secret, used for signed cookies and flash/session security.
-- `DATABASE_URL`: Database connection string. For local development, use `sqlite:///instance/moviehub.db`. For a shared database, point this to a hosted PostgreSQL URL.
+- `SECRET_KEY`: Flask session secret, used for signed cookies and flash/session security. Defaults to `dev-secret-key-change-me`.
+- `DATABASE_URL`: Database connection string. For local development, defaults to `sqlite:///instance/moviehub.db`. For production or shared development, set this to a PostgreSQL URL.
 
-Passwords are hashed with Werkzeug before storage. The secret key is not used to store or recover passwords.
+**Security:** Passwords are hashed using Werkzeug's `generate_password_hash` before storage. The secret key is never used for password storage or recovery.
 
 ## Run Locally
 
@@ -75,4 +75,24 @@ If you need to create or update the local database schema, run migrations with t
 
 ```bash
 export FLASK_APP=run.py && ./.venv/bin/flask db migrate -m "describe changes" && ./.venv/bin/flask db upgrade
+```
+
+## Post-Setup: Seed Demo Data
+
+After running migrations for the first time (or after deleting the database), seed the app with demo movies and diary entries:
+
+```bash
+./.venv/bin/python seed_demo_data.py
+```
+
+This creates a `demo` user with 100 movies and 50 anime diary entries, plus SVG poster placeholders. The seeder is idempotent: running it again will not duplicate entries.
+
+**Important:** Ensure your `DATABASE_URL` environment variable (if set) matches the one used during `flask db upgrade`. If they differ, the seeder will populate a different database than the app reads.
+
+Example (for a specific database file):
+```bash
+export DATABASE_URL=sqlite:///instance/moviehub.db
+./.venv/bin/flask db upgrade
+./.venv/bin/python seed_demo_data.py
+./.venv/bin/flask run
 ```

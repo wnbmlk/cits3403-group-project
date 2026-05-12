@@ -1,0 +1,6 @@
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> d22989e24a2d, add diary entries model
+INFO  [alembic.runtime.migration] Running upgrade d22989e24a2d -> 2d44a4220600, add media_type column
+INFO  [alembic.runtime.migration] Running upgrade 2d44a4220600 -> 7c1b3f0d9f5c, seed demo data
+Seeded demo data: 100 movies and 50 anime entries.
