@@ -7,7 +7,7 @@
 <section class="hero-section">
     <div class="container">
         <h1>Movie Diary</h1>
-        <p class="desc">Recommended classic movies to watch, save, and review in your diary.</p>
+        <p class="desc">Your seeded diary entries and community activity, surfaced from the database.</p>
         <div class="d-flex flex-wrap gap-2 mt-4">
             <a class="btn btn-primary" href="{{ url_for('diary') }}">Explore diary</a>
         </div>
@@ -16,27 +16,36 @@
 
 <section class="diary-section">
     <div class="container">
-        <h2 class="mb-4">Recommended movies to watch</h2>
+        {% if feed_mode == 'personal' %}
+            <h2 class="mb-4">Your recent diary entries</h2>
+        {% else %}
+            <h2 class="mb-4">Community diary entries</h2>
+        {% endif %}
         <div class="row g-3">
-
-            {% for movie in movies %}
-            <div class="col-12 col-md-4">
-                <a href="{{ url_for('movie_detail', movie_id=movie.id) }}" class="text-decoration-none">
-                    <div class="movie-card-item h-100">
-                        <div class="d-flex align-items-start gap-3">
-                            <img class="movie-thumb"
-                                 src="{{ movie.poster }}"
-                                 alt="{{ movie.title }} poster">
-                            <div>
-                                <h3>{{ movie.title }} ({{ movie.year }})</h3>
-                                <p>{{ movie.summary[:90] }}...</p>
-                                <p><strong>Rating:</strong> {{ movie.rating }}</p>
+            {% if entries %}
+                {% for entry in entries %}
+                    <div class="col-12 col-md-4">
+                        <div class="movie-card-item h-100">
+                            <div class="d-flex align-items-start gap-3">
+                                <img class="movie-thumb"
+                                     src="{{ entry.poster_path if entry.poster_path else 'https://via.placeholder.com/56x84?text=No+Image' }}"
+                                     alt="{{ entry.title }} poster">
+                                <div>
+                                    <h3>{{ entry.title }}</h3>
+                                    <p>
+                                        {{ entry.status if entry.status else 'Saved' }}
+                                        {% if entry.media_type %} • {{ entry.media_type }}{% endif %}
+                                        {% if entry.genre %} • {{ entry.genre }}{% endif %}
+                                    </p>
+                                    {% if entry.date %}
+                                        <p class="entry-date">{{ entry.date.strftime('%d %b %Y') }}</p>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </a>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            {% endif %}
 
         </div>
     </div>
