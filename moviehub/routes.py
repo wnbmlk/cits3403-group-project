@@ -1,5 +1,5 @@
 # Route handlers and backend helpers for authentication, diary, search, and profile summaries.
-from .movie_data import MOVIES, get_movie
+from .movie_data import get_movie
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -163,7 +163,49 @@ def validate_password(password):
 
 
 def home():
-    return render_template("index.html", movies=MOVIES)
+    if current_user.is_authenticated:
+        entries = [
+            {
+                "title": entry.title,
+                "status": entry.status,
+                "media_type": entry.media_type,
+                "genre": entry.genre,
+                "poster_path": _display_poster_path(entry.title, entry.poster_path),
+                "date": entry.date,
+            }
+            for entry in DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date.desc()).limit(9).all()
+        ]
+
+        if not entries:
+            entries = [
+                {
+                    "title": entry.title,
+                    "status": entry.status,
+                    "media_type": entry.media_type,
+                    "genre": entry.genre,
+                    "poster_path": _display_poster_path(entry.title, entry.poster_path),
+                    "date": entry.date,
+                }
+                for entry in DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
+            ]
+            feed_mode = "community"
+        else:
+            feed_mode = "personal"
+    else:
+        entries = [
+            {
+                "title": entry.title,
+                "status": entry.status,
+                "media_type": entry.media_type,
+                "genre": entry.genre,
+                "poster_path": _display_poster_path(entry.title, entry.poster_path),
+                "date": entry.date,
+            }
+            for entry in DiaryEntry.query.filter(DiaryEntry.poster_path.isnot(None)).order_by(db.func.random()).limit(9).all()
+        ]
+        feed_mode = "community"
+
+    return render_template("index.html", entries=entries, feed_mode=feed_mode)
 
 
 def about():
