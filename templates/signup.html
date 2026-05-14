@@ -98,16 +98,36 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Re-enter password</label>
+                        {{ form.confirm_password(
+                            id='confirm_password',
+                            class_='form-control' + (' is-invalid' if form.confirm_password.errors else ''),
+                            placeholder='Re-enter password',
+                            autocomplete='new-password'
+                        ) }}
+                        {% if form.confirm_password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.confirm_password.errors[0] }}
+                            </div>
+                        {% else %}
+                            <div id="confirmPasswordHint" class="invalid-feedback d-block" hidden>Passwords do not match</div>
+                        {% endif %}
+                    </div>
+
                     <button type="submit" class="btn-signup" id="submitBtn">Create Account</button>
                 </form>
 
                 <script>
                     const passwordInput = document.getElementById('password');
+                    const confirmPasswordInput = document.getElementById('confirm_password');
+                    const confirmPasswordHint = document.getElementById('confirmPasswordHint');
                     const strengthFill = document.getElementById('strengthFill');
                     const strengthText = document.getElementById('strengthText');
                     const submitBtn = document.getElementById('submitBtn');
                     const csrfTokenInput = document.querySelector('input[name="csrf_token"]');
                     const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+                    let isPasswordValid = false;
 
                     const requirements = {
                         length: document.getElementById('req-length'),
@@ -116,6 +136,19 @@
                         number: document.getElementById('req-number'),
                         special: document.getElementById('req-special')
                     };
+
+                    function validateConfirmPassword() {
+                        if (!confirmPasswordInput) {
+                            return true;
+                        }
+
+                        const mismatch = confirmPasswordInput.value.length > 0 && confirmPasswordInput.value !== passwordInput.value;
+                        if (confirmPasswordHint) {
+                            confirmPasswordHint.hidden = !mismatch;
+                        }
+                        confirmPasswordInput.classList.toggle('is-invalid', mismatch);
+                        return !mismatch;
+                    }
 
                     passwordInput.addEventListener('input', async function() {
                         const password = this.value;
@@ -162,12 +195,20 @@
                             updateRequirement('special', reqs.special);
 
                             // Enable/disable submit button
-                            submitBtn.disabled = !data.valid;
+                            isPasswordValid = !!data.valid;
+                            submitBtn.disabled = !isPasswordValid || !validateConfirmPassword();
                         } catch (error) {
                             console.error('Error checking password:', error);
-                            submitBtn.disabled = false;
+                            isPasswordValid = false;
+                            submitBtn.disabled = true;
                         }
                     });
+
+                    if (confirmPasswordInput) {
+                        confirmPasswordInput.addEventListener('input', () => {
+                            submitBtn.disabled = !validateConfirmPassword() || !isPasswordValid;
+                        });
+                    }
 
                     function updateRequirement(name, met) {
                         const elem = requirements[name];

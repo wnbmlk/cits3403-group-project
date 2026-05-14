@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField
-from wtforms.validators import DataRequired, Length, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Length, ValidationError
 
 from .models import User
 
@@ -33,6 +33,13 @@ class SignupForm(FlaskForm):
     password = PasswordField(
         "Password",
         validators=[DataRequired(message="Password is required"), Length(min=8, max=128, message="Password must be at least 8 characters long")],
+    )
+    confirm_password = PasswordField(
+        "Confirm Password",
+        validators=[
+            DataRequired(message="Please re-enter your password"),
+            EqualTo("password", message="Passwords do not match"),
+        ],
     )
 
     def validate_username(self, field):
