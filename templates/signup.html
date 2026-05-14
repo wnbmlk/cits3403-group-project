@@ -32,16 +32,35 @@
                 <p class="form-subtitle">Create your account to continue.</p>
 
                 <form method="POST" action="{{ url_for('signup') }}">
+                    {{ form.hidden_tag() }}
                     <div class="mb-2">
                         <label for="username" class="form-label">Username</label>
-                        <input id="username" name="username" type="text" class="form-control"
-                               placeholder="Choose a username" required>
+                        {{ form.username(
+                            id='username',
+                            class_='form-control' + (' is-invalid' if form.username.errors else ''),
+                            placeholder='Choose a username',
+                            autocomplete='username'
+                        ) }}
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.username.errors[0] }}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input id="password" name="password" type="password" class="form-control"
-                               placeholder="Create password" required>
+                        {{ form.password(
+                            id='password',
+                            class_='form-control' + (' is-invalid' if form.password.errors else ''),
+                            placeholder='Create password',
+                            autocomplete='new-password'
+                        ) }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.password.errors[0] }}
+                            </div>
+                        {% endif %}
                         
                         <!-- Password Strength Meter -->
                         <div class="password-strength-container mt-2">
@@ -79,7 +98,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-signup" id="submitBtn" disabled>Create Account</button>
+                    <button type="submit" class="btn-signup" id="submitBtn">Create Account</button>
                 </form>
 
                 <script>
@@ -87,6 +106,8 @@
                     const strengthFill = document.getElementById('strengthFill');
                     const strengthText = document.getElementById('strengthText');
                     const submitBtn = document.getElementById('submitBtn');
+                    const csrfTokenInput = document.querySelector('input[name="csrf_token"]');
+                    const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
 
                     const requirements = {
                         length: document.getElementById('req-length'),
@@ -103,7 +124,8 @@
                             const response = await fetch('/api/password-strength', {
                                 method: 'POST',
                                 headers: {
-                                    'Content-Type': 'application/json'
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken
                                 },
                                 body: JSON.stringify({ password: password })
                             });
@@ -143,6 +165,7 @@
                             submitBtn.disabled = !data.valid;
                         } catch (error) {
                             console.error('Error checking password:', error);
+                            submitBtn.disabled = false;
                         }
                     });
 
