@@ -6,7 +6,7 @@
 <main class="profile-section">
     <div class="container">
 
-        <div class="md-card profile-header">
+        <div class="md-card profile-header shadow-sm">
             <h1>{{ profile_user.username }}</h1>
             {% if is_public %}
                 <p>Public profile summary powered by their diary entries.</p>
@@ -21,7 +21,7 @@
         <div class="row g-3">
 
             <div class="col-12 col-md-6">
-                <div class="md-card">
+                <div class="md-card shadow-sm">
                     <h2>Recently Watched <span class="profile-count">{{ profile_summary.counts.watched }}</span></h2>
                     {% if profile_summary.watched %}
                         <ul class="status-list status-summary-list">
@@ -36,13 +36,13 @@
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p class="profile-empty">No watched entries yet.</p>
+                        <p class="profile-empty text-center">No watched entries yet.</p>
                     {% endif %}
                 </div>
             </div>
 
             <div class="col-12 col-md-6">
-                <div class="md-card">
+                <div class="md-card shadow-sm">
                     <h2>Currently Watching <span class="profile-count">{{ profile_summary.counts.watching }}</span></h2>
                     {% if profile_summary.watching %}
                         <ul class="status-list status-summary-list">
@@ -57,13 +57,13 @@
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p class="profile-empty">No items are marked as watching.</p>
+                        <p class="profile-empty text-center">No items are marked as watching.</p>
                     {% endif %}
                 </div>
             </div>
 
             <div class="col-12 col-md-6">
-                <div class="md-card">
+                <div class="md-card shadow-sm">
                     <h2>Watchlist <span class="profile-count">{{ profile_summary.counts.watchlist }}</span></h2>
                     {% if profile_summary.watchlist %}
                         <ul class="status-list status-summary-list">
@@ -78,13 +78,13 @@
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p class="profile-empty">No titles are in your watchlist.</p>
+                        <p class="profile-empty text-center">No titles are in your watchlist.</p>
                     {% endif %}
                 </div>
             </div>
 
             <div class="col-12 col-md-6">
-                <div class="md-card">
+                <div class="md-card shadow-sm">
                     <h2>Favourites <span class="profile-count">{{ profile_summary.counts.favourites }}</span></h2>
                     {% if profile_summary.favourites %}
                         <ul class="status-list status-summary-list">
@@ -99,7 +99,7 @@
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p class="profile-empty">No favourites saved yet.</p>
+                        <p class="profile-empty text-center">No favourites saved yet.</p>
                     {% endif %}
                 </div>
             </div>

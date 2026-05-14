@@ -15,11 +15,11 @@
                 <div class="card-body">
                     <h2 class="card-title h6 mb-3">Categories</h2>
                     <div class="d-grid gap-2 filter-group">
-                        <button class="filter-btn active" type="button" data-category="all">All</button>
-                        <button class="filter-btn" type="button" data-category="watched">Watched</button>
-                        <button class="filter-btn" type="button" data-category="favorites">Favourites</button>
-                        <button class="filter-btn" type="button" data-category="watching">Watching</button>
-                        <button class="filter-btn" type="button" data-category="watchlist">Watchlist</button>
+                        <button class="filter-btn active shadow-sm" type="button" data-category="all">All</button>
+                        <button class="filter-btn shadow-sm" type="button" data-category="watched">Watched</button>
+                        <button class="filter-btn shadow-sm" type="button" data-category="favorites">Favourites</button>
+                        <button class="filter-btn shadow-sm" type="button" data-category="watching">Watching</button>
+                        <button class="filter-btn shadow-sm" type="button" data-category="watchlist">Watchlist</button>
                     </div>
                 </div>
             </div>
@@ -31,8 +31,8 @@
                     <label class="form-label small text-muted" for="watchedDateRange">Day or From - To</label>
                     <input id="watchedDateRange" class="form-control date-range-input mb-2" type="text" placeholder="Pick one day or start/end dates">
                     <div class="d-grid">
-                        <button id="applyWatchedRange" class="range-btn mb-2" type="button">Apply watched range</button>
-                        <button id="clearWatchedRange" class="range-btn" type="button">Clear watched range</button>
+                        <button id="applyWatchedRange" class="range-btn shadow-sm mb-2" type="button">Apply watched range</button>
+                        <button id="clearWatchedRange" class="range-btn shadow-sm" type="button">Clear watched range</button>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                 <p class="text-muted">Scroll left to right and click a plus box to add a movie to your timeline.</p>
             </header>
 
-            <section class="timeline-wrap" aria-label="Movie timeline">
+            <section class="timeline-wrap shadow-sm rounded-4 p-3 bg-white" aria-label="Movie timeline">
                 <div class="timeline-line"></div>
                 <div id="timelineTrack" class="timeline-track"></div>
             </section>
@@ -62,7 +62,7 @@
     </div>
 <!-- Movie modal -->
 <div class="modal-backdrop" id="movieModal" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="movieModalTitle">
+    <div class="modal-card shadow-lg" role="dialog" aria-modal="true" aria-labelledby="movieModalTitle">
         <button class="modal-close" id="closeMovieModal" type="button" aria-label="Close search">×</button>
         <h2 id="movieModalTitle">Add a movie</h2>
         <p>Search your timeline library, pick a movie, then choose one or more statuses.</p>
