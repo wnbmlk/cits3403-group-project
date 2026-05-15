@@ -34,6 +34,8 @@ const manualSingleDatePickerDiv = document.getElementById("manualSingleDatePicke
 const manualRangeDatePickerDiv = document.getElementById("manualRangeDatePicker");
 const manualDateModeSingleRadio = document.querySelector('input[name="manualDateMode"][value="single"]');
 const manualDateModeRangeRadio = document.querySelector('input[name="manualDateMode"][value="range"]');
+const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
 
 let watchedRangePicker = null;
 let timelineEntries = [];
@@ -44,6 +46,13 @@ let watchDateEndPicker = null;
 let manualWatchDateSinglePicker = null;
 let manualWatchDateStartPicker = null;
 let manualWatchDateEndPicker = null;
+
+function buildRequestHeaders(extraHeaders = {}) {
+    return {
+        ...extraHeaders,
+        ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+    };
+}
 
 function loadCatalog() {
     if (!movieCatalogData) {
@@ -147,7 +156,7 @@ async function saveTimelineEntry(title, status, genre, date, posterPath = null, 
         }
         const response = await fetch("/api/diary/entries", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: buildRequestHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(body),
         });
 
@@ -176,7 +185,7 @@ async function updateTimelineEntry(id, title, status, genre, date, posterPath = 
         }
         const response = await fetch(`/api/diary/entries/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: buildRequestHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(body),
         });
 
@@ -195,7 +204,7 @@ async function removeTimelineEntry(id) {
     try {
         const response = await fetch(`/api/diary/entries/${id}`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
+            headers: buildRequestHeaders({ "Content-Type": "application/json" }),
         });
 
         if (!response.ok) {
@@ -418,6 +427,7 @@ async function saveManualTimelineEntry(formData) {
     try {
         const response = await fetch("/api/diary/manual-entry", {
             method: "POST",
+            headers: buildRequestHeaders(),
             body: formData,
         });
 

@@ -32,16 +32,31 @@
                 <p class="form-subtitle">Sign in to continue your movie diary.</p>
 
                 <form method="POST" action="{{ url_for('login') }}">
+                    {{ form.hidden_tag() }}
                     <div class="mb-2">
                         <label for="username" class="form-label">Username</label>
-                        <input id="username" name="username" type="text" class="form-control"
-                               placeholder="Your username" autocomplete="username" required>
+                        {{ form.username(
+                            id='username',
+                            class_='form-control' + (' is-invalid' if form.username.errors else ''),
+                            placeholder='Your username',
+                            autocomplete='username'
+                        ) }}
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">{{ form.username.errors[0] }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input id="password" name="password" type="password" class="form-control"
-                               placeholder="Enter password" autocomplete="current-password" required>
+                        {{ form.password(
+                            id='password',
+                            class_='form-control' + (' is-invalid' if form.password.errors else ''),
+                            placeholder='Enter password',
+                            autocomplete='current-password'
+                        ) }}
+                        {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">{{ form.password.errors[0] }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="check-row mb-1">

@@ -10,6 +10,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 from .extensions import db
+from .forms import LoginForm, SignupForm, validate_password_strength
 from .models import DiaryEntry, Movie, User, _display_poster_path
 
 
@@ -139,27 +140,7 @@ def _resolve_tmdb_poster_path(title, fallback_path=None):
 
 
 def validate_password(password):
-    """
-    Validate password strength.
-    Returns a tuple: (is_valid, error_message)
-    """
-    if len(password) < 8:
-        return False, "Password must be at least 8 characters long"
-
-    if not any(c.isupper() for c in password):
-        return False, "Password must contain at least one uppercase letter"
-
-    if not any(c.islower() for c in password):
-        return False, "Password must contain at least one lowercase letter"
-
-    if not any(c.isdigit() for c in password):
-        return False, "Password must contain at least one number"
-
-    special_chars = "!@#$%^&*()-_=+[]{};:'\",.< >?/\\|`~"
-    if not any(c in special_chars for c in password):
-        return False, "Password must contain at least one special character (!@#$%^&* etc.)"
-
-    return True, None
+    return validate_password_strength(password)
 
 
 def home():
@@ -214,7 +195,7 @@ def about():
 
 def check_password_strength():
     """API endpoint for real-time password strength checking"""
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     password = data.get("password", "")
 
     is_valid, error_msg = validate_password(password)
@@ -248,53 +229,38 @@ def check_password_strength():
 
 
 def signup():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        if not username or not password:
-            flash("Username and password required", "danger")
-            return redirect(url_for("signup"))
-
-        is_valid, error_msg = validate_password(password)
-        if not is_valid:
-            flash(error_msg, "danger")
-            return redirect(url_for("signup"))
-
-        existing = User.query.filter_by(username=username).first()
-        if existing:
-            flash("User already exists", "warning")
-            return redirect(url_for("signup"))
-
-        user = User(username=username, password=generate_password_hash(password))
+    form = SignupForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data.strip(), password=generate_password_hash(form.password.data))
         db.session.add(user)
         db.session.commit()
         login_user(user)
         session["boot_id"] = current_app.config.get("SESSION_BOOT_ID")
         return redirect(url_for("profile"))
 
-    return render_template("signup.html")
+    if request.method == "POST":
+        flash("Please fix the highlighted errors and try again.", "danger")
+
+    return render_template("signup.html", form=form)
 
 
 def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data.strip()).first()
 
-        user = None
-        if username:
-            user = User.query.filter_by(username=username).first()
-
-        if user and check_password_hash(user.password, password):
+        if user and check_password_hash(user.password, form.password.data):
             session.permanent = False
             login_user(user, remember=False)
             session["boot_id"] = current_app.config.get("SESSION_BOOT_ID")
             return redirect(url_for("profile"))
 
         flash("Invalid credentials", "danger")
-        return redirect(url_for("login"))
 
-    return render_template("login.html")
+    elif request.method == "POST":
+        flash("Please fix the highlighted errors and try again.", "danger")
+
+    return render_template("login.html", form=form)
 
 
 def _entry_status_tokens(entry):
