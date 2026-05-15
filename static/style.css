@@ -454,3 +454,204 @@ footer {
 #submitBtn:enabled {
     cursor: pointer;
 }
+
+/* =========================
+   UI POLISH UPDATE
+========================= */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: linear-gradient(to bottom, #f5f6f8, #eef2f7);
+}
+
+/* Smooth transitions */
+
+.card,
+.movie-card,
+.movie-card-item,
+.md-card,
+button,
+.btn {
+    transition: all 0.25s ease;
+}
+
+/* Better cards */
+
+.movie-card-item,
+.md-card,
+.sidebar-card,
+.movie-card {
+    border: none !important;
+    border-radius: 18px !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.movie-card-item:hover,
+.md-card:hover,
+.movie-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* Better posters */
+
+.movie-thumb,
+.profile-poster,
+.movie-card img {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    transition: transform 0.25s ease;
+}
+
+.movie-thumb:hover,
+.profile-poster:hover,
+.movie-card img:hover {
+    transform: scale(1.05);
+}
+
+/* Navbar */
+
+.navbar {
+    box-shadow: 0 2px 18px rgba(0,0,0,0.06);
+}
+
+/* Hero section */
+
+.hero-section {
+    position: relative;
+}
+
+.hero-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.25),
+        rgba(0,0,0,0.55)
+    );
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.hero-section .desc {
+    font-size: 1.08rem;
+    max-width: 700px;
+}
+
+/* Buttons */
+
+.btn,
+.filter-btn,
+.range-btn {
+    border-radius: 12px !important;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover,
+.filter-btn:hover,
+.range-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Timeline */
+
+.timeline-track {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.timeline-item {
+    transition: transform 0.2s ease;
+}
+
+.timeline-item:hover {
+    transform: translateY(-4px);
+}
+
+/* Add card */
+
+.add-card {
+    border-radius: 18px !important;
+    border: 2px dashed rgba(47, 111, 159, 0.3) !important;
+    background: rgba(255,255,255,0.7) !important;
+    backdrop-filter: blur(10px);
+}
+
+.add-card:hover {
+    background: white !important;
+    border-color: var(--primary) !important;
+}
+
+/* Profile */
+
+.profile-header {
+    padding: 28px !important;
+}
+
+.profile-header h1 {
+    font-size: 2rem;
+    letter-spacing: -0.5px;
+}
+
+.profile-count {
+    font-size: 0.78rem;
+    padding: 0.28rem 0.7rem;
+}
+
+/* Better list spacing */
+
+.status-summary-list li {
+    padding: 0.85rem 0 !important;
+}
+
+/* Empty states */
+
+.profile-empty {
+    padding: 20px;
+    background: rgba(47,111,159,0.04);
+    border-radius: 14px;
+    border: 1px dashed rgba(47,111,159,0.15);
+}
+
+/* Modal */
+
+.modal-card {
+    border-radius: 22px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+}
+
+/* Inputs */
+
+.form-control,
+.search-input {
+    border-radius: 12px !important;
+    border: 1px solid rgba(0,0,0,0.08) !important;
+    padding: 12px 14px !important;
+}
+
+.form-control:focus,
+.search-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(47,111,159,0.18) !important;
+    border-color: var(--primary) !important;
+}
+
+/* Footer */
+
+footer {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+}

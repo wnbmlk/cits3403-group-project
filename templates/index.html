@@ -6,16 +6,18 @@
 
 <section class="hero-section">
     <div class="container">
-        <h1>Movie Diary</h1>
+        <h1 class="display-4 fw-bold">Movie Diary</h1>
         <p class="desc">Your seeded diary entries and community activity, surfaced from the database.</p>
         <div class="d-flex flex-wrap gap-2 mt-4">
-            <a class="btn btn-primary" href="{{ url_for('diary') }}">Explore diary</a>
+            <a class="btn btn-primary shadow-sm px-4 py-2" href="{{ url_for('diary') }}">
+                Explore diary
+            </a>
         </div>
     </div>
 </section>
 
-<section class="diary-section">
-    <div class="container">
+<section class="diary-section section-spacing">
+    <div class="container text-white">
         {% if feed_mode == 'personal' %}
             <h2 class="mb-4">Your recent diary entries</h2>
         {% else %}
@@ -25,7 +27,7 @@
             {% if entries %}
                 {% for entry in entries %}
                     <div class="col-12 col-md-4">
-                        <div class="movie-card-item h-100">
+                        <div class="movie-card-item h-100 shadow-sm">
                             <div class="d-flex align-items-start gap-3">
                                 <img class="movie-thumb"
                                      src="{{ entry.poster_path if entry.poster_path else 'https://via.placeholder.com/56x84?text=No+Image' }}"
