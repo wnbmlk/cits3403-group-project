@@ -655,3 +655,33 @@ footer {
     background: rgba(255,255,255,0.75);
     backdrop-filter: blur(10px);
 }
+
+/* Flash messages */
+
+.flash-wrapper {
+    position: fixed;
+    top: 90px;
+    right: 24px;
+    z-index: 9999;
+    width: 320px;
+}
+
+.custom-alert {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    backdrop-filter: blur(10px);
+}
+
+/* Better search UI */
+
+.search-input {
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    border: 1px solid rgba(0,0,0,0.08) !important;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.18) !important;
+    border-color: #0d6efd !important;
+}
