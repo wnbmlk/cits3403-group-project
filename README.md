@@ -96,3 +96,51 @@ export DATABASE_URL=sqlite:///instance/moviehub.db
 ./.venv/bin/python seed_demo_data.py
 ./.venv/bin/flask run
 ```
+
+## Testing
+
+### Unit Tests
+
+Run the pytest test suite:
+
+```bash
+source .venv/bin/activate
+pytest tests/test_auth.py tests/test_diary.py -v
+```
+
+This runs 11 unit tests covering:
+- User signup (valid/invalid/duplicate credentials)
+- User login (valid/invalid credentials)
+- Password strength validation
+- Diary entry CRUD operations
+- Access control and permissions
+
+### Selenium Acceptance Tests
+
+To run browser-based acceptance tests:
+
+```bash
+source .venv/bin/activate
+# Ensure Flask app is running on port 5001
+pytest tests/test_selenium_acceptance.py -v
+```
+
+**Prerequisites:**
+- Chrome/Chromium browser installed
+- ChromeDriver installed and in PATH (or use `webdriver-manager`)
+- Flask app must be running: `flask run --port 5001` (in another terminal)
+
+Selenium tests verify:
+- Complete user signup flow
+- Login and authentication
+- Diary entry creation, editing, and deletion
+- Profile page display
+- User search functionality
+
+### Code Quality
+
+- All route functions include docstrings explaining purpose, parameters, and return values
+- XSS prevention: User-generated content escaped in templates with `|escape` filter
+- CSRF protection enabled on all forms and AJAX requests
+- Password validation enforced: 8+ chars with uppercase, lowercase, digits, special chars
+

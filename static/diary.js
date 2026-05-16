@@ -54,6 +54,17 @@ function buildRequestHeaders(extraHeaders = {}) {
     };
 }
 
+function showErrorMessage(message) {
+    // Display error message to user via alert and console
+    console.error("Error:", message);
+    alert(`Error: ${message}`);
+}
+
+function showSuccessMessage(message) {
+    // Log success message to console
+    console.log("Success:", message);
+}
+
 function loadCatalog() {
     if (!movieCatalogData) {
         return [];
@@ -161,12 +172,15 @@ async function saveTimelineEntry(title, status, genre, date, posterPath = null, 
         });
 
         if (!response.ok) {
-            throw new Error("Failed to save diary entry");
+            const errorData = await response.json().catch(() => ({}));
+            const errorMsg = errorData.error || "Failed to save diary entry";
+            throw new Error(errorMsg);
         }
 
         return await response.json();
     } catch (error) {
         console.error("Error saving diary entry:", error);
+        showErrorMessage(error.message || "Failed to save diary entry");
         return null;
     }
 }
@@ -190,12 +204,15 @@ async function updateTimelineEntry(id, title, status, genre, date, posterPath = 
         });
 
         if (!response.ok) {
-            throw new Error("Failed to update diary entry");
+            const errorData = await response.json().catch(() => ({}));
+            const errorMsg = errorData.error || "Failed to update diary entry";
+            throw new Error(errorMsg);
         }
 
         return await response.json();
     } catch (error) {
         console.error("Error updating diary entry:", error);
+        showErrorMessage(error.message || "Failed to update diary entry");
         return null;
     }
 }
@@ -208,12 +225,15 @@ async function removeTimelineEntry(id) {
         });
 
         if (!response.ok) {
-            throw new Error("Failed to delete diary entry");
+            const errorData = await response.json().catch(() => ({}));
+            const errorMsg = errorData.error || "Failed to delete diary entry";
+            throw new Error(errorMsg);
         }
 
         return true;
     } catch (error) {
         console.error("Error deleting diary entry:", error);
+        showErrorMessage(error.message || "Failed to delete diary entry");
         return false;
     }
 }

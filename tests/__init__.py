@@ -1,0 +1,1 @@
+"""Movie Diary test suite."""
