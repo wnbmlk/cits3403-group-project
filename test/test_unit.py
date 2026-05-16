@@ -37,7 +37,7 @@ class AuthUnitTests(unittest.TestCase):
         os.close(self._db_fd)
         os.unlink(self._db_path)
 
-    def test_signup_creates_user_and_redirects_to_profile(self):
+    def test_signup_creates_user_and_sets_profile_redirect(self):
         response = self.client.post(
             "/signup",
             data={

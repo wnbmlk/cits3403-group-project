@@ -71,7 +71,7 @@ class SeleniumSmokeTests(unittest.TestCase):
         os.close(cls._db_fd)
         os.unlink(cls._db_path)
 
-    def test_homepage_loads_and_shows_movie_diary_heading(self):
+    def test_homepage_loads_and_contains_movie_diary_in_heading(self):
         self.driver.get(f"http://127.0.0.1:{self.port}/")
         heading = self.driver.find_element(By.TAG_NAME, "h1")
         self.assertIn("Movie Diary", heading.text)
