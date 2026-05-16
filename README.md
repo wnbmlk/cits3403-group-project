@@ -53,91 +53,87 @@ Create a local `.env` file based on `.env.example` and keep it out of Git.
 
 ## Run Locally
 
-1. Activate the virtual environment.
+### Prerequisites
 
+- Python 3.10+ ([Download](https://www.python.org/downloads/))
+- Git ([Download](https://git-scm.com/downloads))
+- Chrome/Chromium (for Selenium tests)
+
+### Quick Start
+
+1. **Clone and setup virtual environment:**
 ```bash
-source .venv/bin/activate
+git clone https://github.com/your-username/cits3403-group-project.git
+cd cits3403-group-project
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-2. Set the Flask app entrypoint to the new launcher.
-
+2. **Install dependencies:**
 ```bash
-export FLASK_APP=run.py
+pip install -r requirements.txt
 ```
 
-3. Run the development server.
-
+3. **Create `.env` file:**
 ```bash
-./.venv/bin/flask run
+cp .env.example .env
+# Edit .env and add: SECRET_KEY=your-secret-key, DATABASE_URL=sqlite:///instance/moviehub.db
 ```
 
-If you need to create or update the local database schema, run migrations with the same entrypoint:
-
+4. **Initialize database and seed demo data:**
 ```bash
-export FLASK_APP=run.py && ./.venv/bin/flask db migrate -m "describe changes" && ./.venv/bin/flask db upgrade
+flask db upgrade
+python3 seed_demo_data.py
 ```
 
-## Post-Setup: Seed Demo Data
-
-After running migrations for the first time (or after deleting the database), seed the app with demo movies and diary entries:
-
+5. **Run the application:**
 ```bash
-./.venv/bin/python seed_demo_data.py
+python3 app.py
 ```
 
-This creates a `demo` user with 100 movies and 50 anime diary entries, plus SVG poster placeholders. The seeder is idempotent: running it again will not duplicate entries.
+Visit **http://localhost:5000** | Demo credentials: `demo` / `demo`
 
-**Important:** Ensure your `DATABASE_URL` environment variable (if set) matches the one used during `flask db upgrade`. If they differ, the seeder will populate a different database than the app reads.
+### Database Commands
 
-Example (for a specific database file):
+Reset database:
 ```bash
-export DATABASE_URL=sqlite:///instance/moviehub.db
-./.venv/bin/flask db upgrade
-./.venv/bin/python seed_demo_data.py
-./.venv/bin/flask run
+rm instance/moviehub.db
+flask db upgrade
+python3 seed_demo_data.py
+```
+
+Create migration after model changes:
+```bash
+flask db migrate -m "describe changes"
+flask db upgrade
 ```
 
 ## Testing
 
-### Unit Tests
-
-Run the pytest test suite:
+### Run All Tests
 
 ```bash
 source .venv/bin/activate
+pytest tests/unit_tests.py tests/selenium_tests.py -v
+```
+
+Expected: **24 tests passing** in ~35 seconds
+
+### Unit Tests Only (Faster, no browser)
+
+```bash
 pytest tests/unit_tests.py -v
 ```
 
-This runs 17 unit tests covering:
-- User signup (valid/invalid/duplicate credentials)
-- User login (valid/invalid credentials)
-- Password strength validation
-- Diary entry CRUD operations
-- Access control and permissions
+**17 tests:** User signup/login, password validation, diary CRUD, access control
 
-### Selenium Acceptance Tests
-
-To run browser-based acceptance tests:
+### Selenium Tests (End-to-end workflows with browser)
 
 ```bash
-source .venv/bin/activate
 pytest tests/selenium_tests.py -v
 ```
 
-**Note:** Flask server starts automatically (no manual server startup needed).
-
-**Prerequisites:**
-- Chrome/Chromium browser installed
-- ChromeDriver installed and in PATH (or use `webdriver-manager`)
-
-Selenium tests verify end-to-end workflows:
-- **Signup flow:** Register new user → verify redirect → login with new credentials
-- **Login flow:** Create test user → login with valid credentials → verify redirect to dashboard
-- **Diary creation:** Login → navigate to diary → create entry → verify entry appears
-- **User search:** Create test users → search for users → view public profiles
-- Homepage loads without errors
-- About page loads correctly
-- All key pages accessible without 404/500 errors
+**7 tests:** Signup → login → create diary → search users → verify all pages load
 
 ### Code Quality
 
@@ -145,4 +141,95 @@ Selenium tests verify end-to-end workflows:
 - XSS prevention: User-generated content escaped in templates with `|escape` filter
 - CSRF protection enabled on all forms and AJAX requests
 - Password validation enforced: 8+ chars with uppercase, lowercase, digits, special chars
+
+## Troubleshooting
+
+### "ModuleNotFoundError: No module named 'flask'"
+
+**Solution:** Virtual environment not activated or dependencies not installed.
+
+```bash
+source .venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+```
+
+### "Address already in use" (Port 5000)
+
+**Solution:** Another app is using port 5000, or Flask server didn't shut down cleanly.
+
+```bash
+# Kill the process using port 5000
+lsof -ti:5000 | xargs kill -9  # macOS/Linux
+netstat -ano | findstr :5000   # Windows (then taskkill /PID <PID> /F)
+
+# Or specify a different port
+flask run --port 5001
+```
+
+### Selenium tests fail with "ChromeDriver error"
+
+**Solution:** `webdriver-manager` should handle this automatically. If issues persist:
+
+```bash
+pip install --upgrade webdriver-manager
+pytest tests/selenium_tests.py -v  # Should auto-download ChromeDriver
+```
+
+### "No such file or directory: 'instance/moviehub.db'"
+
+**Solution:** Database file doesn't exist. Initialize it:
+
+```bash
+export FLASK_APP=run.py
+flask db upgrade
+python seed_demo_data.py  # Optional
+```
+
+### "RuntimeError: Working outside of request context"
+
+**Solution:** Make sure to activate virtual environment and use `flask run` instead of `python run.py`:
+
+```bash
+source .venv/bin/activate
+export FLASK_APP=run.py
+flask run
+```
+
+### Tests pass individually but fail together
+
+**Solution:** Database state or port conflict. This is normal - tests clean up after themselves:
+
+```bash
+# Run tests with more verbosity to diagnose
+pytest tests/ -v --tb=short
+
+# Or run individually
+pytest tests/unit_tests.py -v
+pytest tests/selenium_tests.py -v
+```
+
+## Project Structure
+
+```
+cits3403-group-project/
+├── moviehub/                    # Main Flask application
+│   ├── __init__.py              # App factory and configuration
+│   ├── config.py                # Flask configuration
+│   ├── models.py                # SQLAlchemy ORM models (User, Movie, DiaryEntry)
+│   ├── routes.py                # View functions and request handlers
+│   ├── extensions.py            # Flask extensions (db, login_manager, etc.)
+│   ├── templates/               # Jinja2 HTML templates
+│   └── static/                  # CSS, JavaScript, images
+├── tests/                       # Test suite
+│   ├── conftest.py              # Pytest configuration and fixtures
+│   ├── unit_tests.py            # 17 unit tests
+│   └── selenium_tests.py        # 7 acceptance tests
+├── migrations/                  # SQLAlchemy migration scripts
+├── instance/                    # Instance folder (database, configs)
+├── run.py                       # Flask app launcher
+├── seed_demo_data.py            # Demo data seeder
+├── requirements.txt             # Python dependencies
+├── README.md                    # This file
+└── .env                         # Environment variables (create locally)
+```
 
