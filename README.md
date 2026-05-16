@@ -105,10 +105,10 @@ Run the pytest test suite:
 
 ```bash
 source .venv/bin/activate
-pytest tests/test_auth.py tests/test_diary.py -v
+pytest tests/unit_tests.py -v
 ```
 
-This runs 11 unit tests covering:
+This runs 17 unit tests covering:
 - User signup (valid/invalid/duplicate credentials)
 - User login (valid/invalid credentials)
 - Password strength validation
@@ -122,7 +122,7 @@ To run browser-based acceptance tests:
 ```bash
 source .venv/bin/activate
 # Ensure Flask app is running on port 5001
-pytest tests/test_selenium_acceptance.py -v
+pytest tests/selenium_tests.py -v
 ```
 
 **Prerequisites:**

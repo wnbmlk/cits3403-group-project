@@ -68,7 +68,7 @@ def _validate_genre(value):
 
 def _parse_date_or_today(value):
     if not value:
-        now = datetime.utcnow()
+        now = datetime.now()
         return now.replace(hour=0, minute=0, second=0, microsecond=0), None
 
     try:
@@ -501,7 +501,8 @@ def update_diary_entry(entry_id):
     Validates user ownership and field values.
     Returns 200 with updated entry, 403 if not owner, 404 if not found.
     """
-    entry = DiaryEntry.query.get(entry_id)
+    # Use session.get to avoid deprecated Query.get usage
+    entry = db.session.get(DiaryEntry, entry_id)
 
     if not entry:
         return {"error": "Entry not found"}, 404
@@ -613,7 +614,8 @@ def delete_diary_entry(entry_id):
     Validates user ownership before deletion.
     Returns 200 on success, 403 if not owner, 404 if not found.
     """
-    entry = DiaryEntry.query.get(entry_id)
+    # Use session.get to avoid deprecated Query.get usage
+    entry = db.session.get(DiaryEntry, entry_id)
 
     if not entry:
         return {"error": "Entry not found"}, 404

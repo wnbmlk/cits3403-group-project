@@ -118,4 +118,3 @@ class TestNavigationAndPages:
             page_source = driver.page_source.lower()
             assert "404" not in page_source, f"404 error on {name} page"
             assert "500" not in page_source, f"500 error on {name} page"
-

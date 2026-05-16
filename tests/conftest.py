@@ -25,6 +25,11 @@ def app():
         yield app
         db.session.remove()
         db.drop_all()
+        # Dispose engine to ensure all connections are closed and avoid ResourceWarning
+        try:
+            db.engine.dispose()
+        except Exception:
+            pass
 
 
 @pytest.fixture
