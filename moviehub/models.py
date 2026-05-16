@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import current_app
@@ -75,8 +75,8 @@ class DiaryEntry(db.Model):
     poster_path = db.Column(db.String(255), nullable=True)
     date = db.Column(db.DateTime, nullable=False)
     date_watched_end = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 

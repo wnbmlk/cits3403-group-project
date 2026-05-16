@@ -30,7 +30,11 @@ def create_app(config_object=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        # Use session.get to avoid deprecated Query.get usage
+        try:
+            return db.session.get(User, int(user_id))
+        except Exception:
+            return None
 
     @login_manager.unauthorized_handler
     def unauthorized():

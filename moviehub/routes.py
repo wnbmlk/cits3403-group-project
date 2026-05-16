@@ -68,7 +68,7 @@ def _validate_genre(value):
 
 def _parse_date_or_today(value):
     if not value:
-        now = datetime.utcnow()
+        now = datetime.now()
         return now.replace(hour=0, minute=0, second=0, microsecond=0), None
 
     try:
@@ -144,6 +144,12 @@ def validate_password(password):
 
 
 def home():
+    """Display homepage with personal or community movie feed.
+    
+    For authenticated users: shows their 9 most recent diary entries,
+    or community feed if they have no entries.
+    For anonymous users: shows 9 random community entries with posters.
+    """
     if current_user.is_authenticated:
         entries = [
             {
@@ -190,11 +196,16 @@ def home():
 
 
 def about():
+    """Display application information and about page."""
     return render_template("about.html")
 
 
 def check_password_strength():
-    """API endpoint for real-time password strength checking"""
+    """API endpoint for real-time password strength checking.
+    
+    Returns password strength score (0-5), validity status, and specific
+    requirement checks (length, uppercase, lowercase, numbers, special chars).
+    """
     data = request.get_json(silent=True) or {}
     password = data.get("password", "")
 
@@ -229,6 +240,13 @@ def check_password_strength():
 
 
 def signup():
+    """Handle user registration (GET/POST).
+    
+    GET: Display signup form with validation hints.
+    POST: Create new user with validated credentials, hash password,
+    and log user in before redirecting to profile.
+    Validates: username uniqueness, password strength, password confirmation.
+    """
     form = SignupForm()
     if form.validate_on_submit():
         user = User(username=form.username.data.strip(), password=generate_password_hash(form.password.data))
@@ -245,6 +263,12 @@ def signup():
 
 
 def login():
+    """Handle user authentication (GET/POST).
+    
+    GET: Display login form.
+    POST: Verify credentials, create session, set boot_id for security.
+    Redirects to profile on success or shows error on invalid credentials.
+    """
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data.strip()).first()
@@ -335,6 +359,11 @@ def _find_user_by_username(username):
 
 @login_required
 def profile():
+    """Display current user's profile with categorized diary entries.
+    
+    Shows: watched (5 recent), watching (5 recent), watchlist (5 recent),
+    and favourites (10 recent) with entry counts.
+    """
     profile_summary = _build_profile_summary(current_user.id)
     return render_template(
         "profile.html",
@@ -346,6 +375,11 @@ def profile():
 
 @login_required
 def user_search():
+    """Search for users by username (case-insensitive).
+    
+    Query parameter 'q' contains search term.
+    Returns search form and matching user's profile if found.
+    """
     query = (request.args.get("q") or "").strip()
     searched_user = _find_user_by_username(query) if query else None
     return render_template("users_search.html", query=query, searched_user=searched_user)
@@ -353,6 +387,11 @@ def user_search():
 
 @login_required
 def public_profile(username):
+    """Display public profile for a specific user.
+    
+    Shows user's categorized diary entries (max 5 per category).
+    Returns 404 if user not found.
+    """
     profile_user = _find_user_by_username(username)
     if not profile_user:
         return render_template("users_search.html", query=username, searched_user=None, search_error="User not found"), 404
@@ -368,6 +407,7 @@ def public_profile(username):
 
 @login_required
 def logout():
+    """Clear user session and redirect to homepage."""
     logout_user()
     session.clear()
     return redirect(url_for("home"))
@@ -375,6 +415,11 @@ def logout():
 
 @login_required
 def diary():
+    """Display diary page with timeline and entry management interface.
+    
+    Provides: movie search/selection, manual entry with file upload,
+    date range filtering, status categorization, edit/delete functionality.
+    """
     movie_catalog = [movie.to_dict() for movie in Movie.query.order_by(Movie.title.asc()).all()]
     return render_template("diary.html", movie_catalog=movie_catalog)
 
@@ -388,7 +433,15 @@ def get_diary_entries():
 
 @login_required
 def create_diary_entry():
-    """Create a new diary entry for the current user"""
+    """Create a new diary entry from JSON data.
+    
+    Required fields: title, status, date.
+    Optional: genre, date_watched_end, poster_path.
+    Validates title length (≤200 chars), status (predefined values),
+    and date format (ISO 8601).
+    Auto-creates Movie entry if not exists.
+    Returns 201 with entry dict, or 400 with error message.
+    """
     data = request.get_json()
 
     if not data or "title" not in data or "status" not in data or "date" not in data:
@@ -442,8 +495,14 @@ def create_diary_entry():
 
 @login_required
 def update_diary_entry(entry_id):
-    """Update a diary entry"""
-    entry = DiaryEntry.query.get(entry_id)
+    """Update existing diary entry.
+    
+    Allows partial updates: title, status, genre, poster_path, dates.
+    Validates user ownership and field values.
+    Returns 200 with updated entry, 403 if not owner, 404 if not found.
+    """
+    # Use session.get to avoid deprecated Query.get usage
+    entry = db.session.get(DiaryEntry, entry_id)
 
     if not entry:
         return {"error": "Entry not found"}, 404
@@ -491,6 +550,13 @@ def update_diary_entry(entry_id):
 
 @login_required
 def create_manual_diary_entry():
+    """Create diary entry with custom poster file upload.
+    
+    Form fields: title, genre, statuses, date, date_watched_end, photo.
+    Validates title/genre, normalizes statuses, validates file size (≤5MB),
+    accepted extensions (.png, .jpg, .jpeg, .webp, .gif).
+    Returns 201 with entry dict, or 400 with error message.
+    """
     title, title_error = _validate_title(request.form.get("title"))
     if title_error:
         return {"error": title_error}, 400
@@ -543,8 +609,13 @@ def create_manual_diary_entry():
 
 @login_required
 def delete_diary_entry(entry_id):
-    """Delete a diary entry"""
-    entry = DiaryEntry.query.get(entry_id)
+    """Delete a diary entry.
+    
+    Validates user ownership before deletion.
+    Returns 200 on success, 403 if not owner, 404 if not found.
+    """
+    # Use session.get to avoid deprecated Query.get usage
+    entry = db.session.get(DiaryEntry, entry_id)
 
     if not entry:
         return {"error": "Entry not found"}, 404
@@ -558,6 +629,10 @@ def delete_diary_entry(entry_id):
     return {"success": True}
 
 def movie_detail(movie_id):
+    """Display details for a specific movie.
+    
+    Returns 404 if movie not found.
+    """
     movie = get_movie(movie_id)
 
     if movie is None:
