@@ -121,21 +121,23 @@ To run browser-based acceptance tests:
 
 ```bash
 source .venv/bin/activate
-# Ensure Flask app is running on port 5001
 pytest tests/selenium_tests.py -v
 ```
+
+**Note:** Flask server starts automatically (no manual server startup needed).
 
 **Prerequisites:**
 - Chrome/Chromium browser installed
 - ChromeDriver installed and in PATH (or use `webdriver-manager`)
-- Flask app must be running: `flask run --port 5001` (in another terminal)
 
-Selenium tests verify:
-- Complete user signup flow
-- Login and authentication
-- Diary entry creation, editing, and deletion
-- Profile page display
-- User search functionality
+Selenium tests verify end-to-end workflows:
+- **Signup flow:** Register new user → verify redirect → login with new credentials
+- **Login flow:** Create test user → login with valid credentials → verify redirect to dashboard
+- **Diary creation:** Login → navigate to diary → create entry → verify entry appears
+- **User search:** Create test users → search for users → view public profiles
+- Homepage loads without errors
+- About page loads correctly
+- All key pages accessible without 404/500 errors
 
 ### Code Quality
 
