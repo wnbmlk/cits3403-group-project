@@ -96,3 +96,16 @@ export DATABASE_URL=sqlite:///instance/moviehub.db
 ./.venv/bin/python seed_demo_data.py
 ./.venv/bin/flask run
 ```
+
+## Testing
+
+Tests are organized in a single `test/` folder with two files:
+
+- `test/test_unit.py` for unit tests (form/authentication flows)
+- `test/test_selenium.py` for Selenium browser smoke tests
+
+Run all tests:
+
+```bash
+python -m unittest discover -s test -p "test*.py" -v
+```
