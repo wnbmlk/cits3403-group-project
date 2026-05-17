@@ -63,7 +63,7 @@ Create a local `.env` file based on `.env.example` and keep it out of Git.
 
 1. **Clone and setup virtual environment:**
 ```bash
-git clone https://github.com/your-username/cits3403-group-project.git
+git clone https://github.com/wnbmlk/cits3403-group-project.git
 cd cits3403-group-project
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
