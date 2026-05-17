@@ -30,7 +30,6 @@ def create_app(config_object=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        # Use session.get to avoid deprecated Query.get usage
         try:
             return db.session.get(User, int(user_id))
         except Exception:
@@ -45,12 +44,10 @@ def create_app(config_object=Config):
     def invalidate_stale_sessions():
         if not current_user.is_authenticated:
             return
-
         session_boot_id = session.get("boot_id")
         current_boot_id = app.config.get("SESSION_BOOT_ID")
         if session_boot_id and session_boot_id == current_boot_id:
             return
-
         logout_user()
         session.clear()
         flash("Your session expired when the app restarted. Please log in again.", "warning")
@@ -76,6 +73,8 @@ def create_app(config_object=Config):
     app.add_url_rule("/api/diary/manual-entry", endpoint="create_manual_diary_entry", view_func=routes.create_manual_diary_entry, methods=["POST"])
     app.add_url_rule("/api/diary/entries/<int:entry_id>", endpoint="update_diary_entry", view_func=routes.update_diary_entry, methods=["PUT"])
     app.add_url_rule("/api/diary/entries/<int:entry_id>", endpoint="delete_diary_entry", view_func=routes.delete_diary_entry, methods=["DELETE"])
+    # NEW: diary stats endpoint
+    app.add_url_rule("/api/diary/stats", endpoint="get_diary_stats", view_func=routes.get_diary_stats, methods=["GET"])
     app.add_url_rule("/movie/<int:movie_id>", endpoint="movie_detail", view_func=routes.movie_detail)
 
     return app
@@ -85,15 +84,12 @@ def _ensure_diary_entry_poster_column():
     engine = db.engine
     if engine.dialect.name != "sqlite":
         return
-
     inspector = inspect(engine)
     if "diary_entry" not in inspector.get_table_names():
         return
-
     columns = {column["name"] for column in inspector.get_columns("diary_entry")}
     if "poster_path" in columns:
         return
-
     with engine.begin() as connection:
         connection.execute(text("ALTER TABLE diary_entry ADD COLUMN poster_path VARCHAR(255)"))
 
@@ -102,16 +98,12 @@ def _ensure_diary_entry_date_watched_end_column():
     engine = db.engine
     if engine.dialect.name != "sqlite":
         return
-
     inspector = inspect(engine)
-
     if "diary_entry" not in inspector.get_table_names():
         return
-
     columns = {column["name"] for column in inspector.get_columns("diary_entry")}
     if "date_watched_end" in columns:
         return
-
     with engine.begin() as connection:
         connection.execute(text("ALTER TABLE diary_entry ADD COLUMN date_watched_end DATETIME"))
 
@@ -120,15 +112,11 @@ def _ensure_movie_columns():
     engine = db.engine
     if engine.dialect.name != "sqlite":
         return
-
     inspector = inspect(engine)
-
     if "movie" not in inspector.get_table_names():
         return
-
     columns = {column["name"] for column in inspector.get_columns("movie")}
     statements = []
-
     if "media_type" not in columns:
         statements.append("ALTER TABLE movie ADD COLUMN media_type VARCHAR(50)")
     if "status" not in columns:
@@ -137,27 +125,8 @@ def _ensure_movie_columns():
         statements.append("ALTER TABLE movie ADD COLUMN poster_path VARCHAR(255)")
     if "rating" not in columns:
         statements.append("ALTER TABLE movie ADD COLUMN rating FLOAT")
-
     if not statements:
         return
-
     with engine.begin() as connection:
         for statement in statements:
             connection.execute(text(statement))
-
-
-def _ensure_diary_entry_date_watched_end_column():
-    engine = db.engine
-    if engine.dialect.name != "sqlite":
-        return
-
-    inspector = inspect(engine)
-    if "diary_entry" not in inspector.get_table_names():
-        return
-
-    columns = {column["name"] for column in inspector.get_columns("diary_entry")}
-    if "date_watched_end" in columns:
-        return
-
-    with engine.begin() as connection:
-        connection.execute(text("ALTER TABLE diary_entry ADD COLUMN date_watched_end DATETIME"))

@@ -1,5 +1,5 @@
 # Route handlers and backend helpers for authentication, diary, search, and profile summaries.
-from .movie_data import get_movie
+from .movie_data import get_movie, MOVIES
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -418,10 +418,34 @@ def diary():
     """Display diary page with timeline and entry management interface.
     
     Provides: movie search/selection, manual entry with file upload,
-    date range filtering, status categorization, edit/delete functionality.
+    date range filtering, status categorization, edit/delete functionality,
+    quick-add recommended movies, and dashboard stats bar.
     """
     movie_catalog = [movie.to_dict() for movie in Movie.query.order_by(Movie.title.asc()).all()]
-    return render_template("diary.html", movie_catalog=movie_catalog)
+    # Top 6 curated picks for Quick Add strip (highest rated from movie_data)
+    recommended_movies = MOVIES[:10]
+    return render_template("diary.html", movie_catalog=movie_catalog, recommended_movies=recommended_movies)
+
+
+@login_required
+def get_diary_stats():
+    """Return aggregate stats for the current user's diary.
+    
+    Returns counts for total entries, watched, watching, watchlist, and favourites.
+    """
+    entries = DiaryEntry.query.filter_by(user_id=current_user.id).all()
+    total = len(entries)
+    watched = sum(1 for e in entries if "watched" in (e.status or "").lower())
+    watching = sum(1 for e in entries if "watching" in (e.status or "").lower() and "watched" not in (e.status or "").lower().replace("watching", ""))
+    watchlist = sum(1 for e in entries if "watchlist" in (e.status or "").lower())
+    favourites = sum(1 for e in entries if "favourite" in (e.status or "").lower() or "favorite" in (e.status or "").lower())
+    return {
+        "total": total,
+        "watched": watched,
+        "watching": watching,
+        "watchlist": watchlist,
+        "favourites": favourites,
+    }
 
 
 @login_required
