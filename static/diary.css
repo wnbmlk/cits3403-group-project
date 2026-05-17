@@ -545,3 +545,182 @@ body {
         grid-template-columns: 1fr;
     }
 }
+/* ═══════════════════════════════════════════
+   Dashboard Stats Bar
+═══════════════════════════════════════════ */
+.stats-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.stat-pill {
+    flex: 1 1 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 10px 10px;
+    box-shadow: var(--soft-shadow);
+    min-width: 70px;
+}
+
+.stat-num {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.stat-label {
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════
+   Quick Add Strip
+═══════════════════════════════════════════ */
+.quick-add-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px 18px;
+    box-shadow: var(--soft-shadow);
+}
+
+.quick-add-header {
+    margin-bottom: 12px;
+}
+
+.quick-add-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 2px;
+}
+
+.quick-add-subtitle {
+    margin: 0;
+}
+
+.quick-add-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+}
+
+.quick-add-track::-webkit-scrollbar { height: 6px; }
+.quick-add-track::-webkit-scrollbar-thumb { background: #b9c8d8; border-radius: 999px; }
+
+.quick-add-card {
+    flex-shrink: 0;
+    width: 110px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fbfcfe;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    box-shadow: var(--soft-shadow);
+}
+
+.quick-add-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px rgba(47,111,159,0.18);
+    transform: translateY(-2px);
+}
+
+.quick-add-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+}
+
+.quick-add-meta {
+    padding: 7px 8px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.quick-add-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.quick-add-rating {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════
+   Empty timeline — improved state
+═══════════════════════════════════════════ */
+.empty-timeline {
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: var(--soft-shadow);
+    text-align: center;
+    color: var(--text-muted);
+    gap: 8px;
+}
+
+.empty-timeline-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.empty-timeline-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.empty-timeline-hint {
+    font-size: 0.86rem;
+    margin: 0;
+    max-width: 220px;
+}
+
+.empty-timeline-cta {
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.empty-timeline-cta:hover { background: #245f8a; }

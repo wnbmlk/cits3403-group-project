@@ -9,8 +9,69 @@
 
 {% block content %}
 <main class="container py-4 page-wrap">
+
+    <!-- ── Dashboard Stats Bar ── -->
+    <section id="statsBar" class="stats-bar mb-4" aria-label="Diary statistics">
+        <div class="stat-pill">
+            <span class="stat-num" id="statTotal">–</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-pill">
+            <span class="stat-num" id="statWatched">–</span>
+            <span class="stat-label">Watched</span>
+        </div>
+        <div class="stat-pill">
+            <span class="stat-num" id="statWatching">–</span>
+            <span class="stat-label">Watching</span>
+        </div>
+        <div class="stat-pill">
+            <span class="stat-num" id="statWatchlist">–</span>
+            <span class="stat-label">Watchlist</span>
+        </div>
+        <div class="stat-pill">
+            <span class="stat-num" id="statFavourites">–</span>
+            <span class="stat-label">Favourites</span>
+        </div>
+    </section>
+
+    <!-- ── Quick Add: Recommended Movies ── -->
+    <section class="quick-add-section mb-4" aria-label="Recommended movies">
+        <div class="quick-add-header">
+            <h2 class="quick-add-title">Quick Add — Recommended Movies</h2>
+            <p class="quick-add-subtitle text-muted small">Click any card to add it directly to your diary.</p>
+        </div>
+        <div class="quick-add-track">
+            {% for m in recommended_movies %}
+            <button class="quick-add-card" type="button"
+                    data-title="{{ m.title | escape }}"
+                    data-poster="{{ m.poster }}"
+                    data-genre=""
+                    aria-label="Quick add {{ m.title | escape }}">
+                <img src="{{ m.poster }}" alt="{{ m.title | escape }} poster" loading="lazy">
+                <div class="quick-add-meta">
+                    <span class="quick-add-name">{{ m.title | escape }}</span>
+                    <span class="quick-add-rating">{{ m.rating }}</span>
+                </div>
+            </button>
+            {% endfor %}
+        </div>
+    </section>
+
     <div class="row g-4 align-items-start diary-layout">
-        <aside class="col-12 col-md-3 diary-sidebar" aria-label="Diary categories">
+
+        <!-- ── Sidebar ── -->
+        <aside class="col-12 col-md-3 diary-sidebar" aria-label="Diary filters">
+
+            <!-- Inline timeline search -->
+            <div class="card sidebar-card mb-3">
+                <div class="card-body">
+                    <h2 class="card-title h6 mb-2">🔍 Search Timeline</h2>
+                    <input id="timelineSearch" class="form-control form-control-sm" type="search"
+                           placeholder="Search your diary…" autocomplete="off">
+                </div>
+            </div>
+
+            <!-- Categories -->
             <div class="card sidebar-card mb-3">
                 <div class="card-body">
                     <h2 class="card-title h6 mb-3">Categories</h2>
@@ -24,33 +85,48 @@
                 </div>
             </div>
 
+            <!-- Sort -->
             <div class="card sidebar-card mb-3">
                 <div class="card-body">
-                    <h2 class="card-title h6 mb-2">Watch Range</h2>
-                    <p class="sidebar-note text-muted small">Pick one day or a start/end range, then apply.</p>
-                    <label class="form-label small text-muted" for="watchedDateRange">Day or From - To</label>
-                    <input id="watchedDateRange" class="form-control date-range-input mb-2" type="text" placeholder="Pick one day or start/end dates">
-                    <div class="d-grid">
-                        <button id="applyWatchedRange" class="range-btn shadow-sm mb-2" type="button">Apply watched range</button>
-                        <button id="clearWatchedRange" class="range-btn shadow-sm" type="button">Clear watched range</button>
+                    <h2 class="card-title h6 mb-2">Sort By</h2>
+                    <div class="d-grid gap-2 filter-group">
+                        <button class="range-btn sort-btn active shadow-sm" type="button" data-sort="date-desc">Newest First</button>
+                        <button class="range-btn sort-btn shadow-sm" type="button" data-sort="date-asc">Oldest First</button>
+                        <button class="range-btn sort-btn shadow-sm" type="button" data-sort="title-asc">Title A–Z</button>
+                        <button class="range-btn sort-btn shadow-sm" type="button" data-sort="title-desc">Title Z–A</button>
                     </div>
                 </div>
             </div>
 
+            <!-- Date range -->
+            <div class="card sidebar-card mb-3">
+                <div class="card-body">
+                    <h2 class="card-title h6 mb-2">Watch Range</h2>
+                    <p class="sidebar-note text-muted small">Pick one day or a start/end range, then apply.</p>
+                    <label class="form-label small text-muted" for="watchedDateRange">Day or From – To</label>
+                    <input id="watchedDateRange" class="form-control date-range-input mb-2" type="text" placeholder="Pick dates">
+                    <div class="d-grid">
+                        <button id="applyWatchedRange" class="range-btn shadow-sm mb-2" type="button">Apply range</button>
+                        <button id="clearWatchedRange" class="range-btn shadow-sm" type="button">Clear range</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help -->
             <div class="card sidebar-card">
                 <div class="card-body">
                     <h2 class="card-title h6 mb-2">Help</h2>
-                    <p class="sidebar-note text-muted small mb-0">Choose a category or date range to narrow the timeline. The add box always stays at the end.</p>
+                    <p class="sidebar-note text-muted small mb-0">Use search, category buttons, sort options, or date range to narrow your timeline. The add box always stays at the end.</p>
                 </div>
             </div>
 
         </aside>
 
-        <!-- Main content -->
+        <!-- ── Main content ── -->
         <section class="col-12 col-md-9 diary-main">
             <header class="page-head mb-3">
                 <h1 class="fw-bold">Diary Timeline</h1>
-                <p class="text-muted">Scroll left to right and click a plus box to add a movie to your timeline.</p>
+                <p class="text-muted">Scroll left to right and click the plus box to add a movie.</p>
             </header>
 
             <section class="timeline-wrap shadow-sm rounded-4 p-3 bg-white" aria-label="Movie timeline">
@@ -60,111 +136,107 @@
         </section>
 
     </div>
-<!-- Movie modal -->
-<div class="modal-backdrop" id="movieModal" hidden>
-    <div class="modal-card shadow-lg" role="dialog" aria-modal="true" aria-labelledby="movieModalTitle">
-        <button class="modal-close" id="closeMovieModal" type="button" aria-label="Close search">×</button>
-        <h2 id="movieModalTitle">Add a movie</h2>
-        <p>Search your timeline library, pick a movie, then choose one or more statuses.</p>
-        <label class="search-label" for="movieSearch">Search title</label>
-        <input id="movieSearch" class="search-input shadow-sm" type="search" placeholder="Type a movie name...">
-        <div id="searchResults" class="search-results"></div>
 
-        <div id="manualAddSection" class="mt-3" hidden>
-            <h3 class="h6 mb-2">Movie not found? Add it manually</h3>
-            <label class="search-label" for="manualTitleInput">Title</label>
-            <input id="manualTitleInput" class="search-input" type="text" placeholder="Movie title">
+    <!-- ── Movie modal ── -->
+    <div class="modal-backdrop" id="movieModal" hidden>
+        <div class="modal-card shadow-lg" role="dialog" aria-modal="true" aria-labelledby="movieModalTitle">
+            <button class="modal-close" id="closeMovieModal" type="button" aria-label="Close search">×</button>
+            <h2 id="movieModalTitle">Add a movie</h2>
+            <p>Search your library, pick a movie, then choose one or more statuses.</p>
+            <label class="search-label" for="movieSearch">Search title</label>
+            <input id="movieSearch" class="search-input shadow-sm" type="search" placeholder="Type a movie name…">
+            <div id="searchResults" class="search-results"></div>
 
-            <label class="search-label" for="manualGenreInput">Genre (optional)</label>
-            <input id="manualGenreInput" class="search-input" type="text" placeholder="e.g. Drama, Action">
+            <div id="manualAddSection" class="mt-3" hidden>
+                <h3 class="h6 mb-2">Movie not found? Add it manually</h3>
+                <label class="search-label" for="manualTitleInput">Title</label>
+                <input id="manualTitleInput" class="search-input" type="text" placeholder="Movie title">
 
-            <label class="search-label" for="manualPhotoInput">Photo (optional)</label>
-            <input id="manualPhotoInput" class="search-input" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif">
+                <label class="search-label" for="manualGenreInput">Genre (optional)</label>
+                <input id="manualGenreInput" class="search-input" type="text" placeholder="e.g. Drama, Action">
 
-            <label class="search-label">Status</label>
-            <div class="d-grid gap-2 mb-3">
-                <label><input type="checkbox" class="manual-status-checkbox" value="Watched"> Watched</label>
-                <label><input type="checkbox" class="manual-status-checkbox" value="Watchlist"> Watchlist</label>
-                <label><input type="checkbox" class="manual-status-checkbox" value="Favourite"> Favourite</label>
-                <label><input type="checkbox" class="manual-status-checkbox" value="Watching"> Watching</label>
-            </div>
-            
-            <label class="search-label small">When did you watch it?</label>
-            <div class="d-flex gap-2 mb-2">
-                <label class="flex-grow-1"><input type="radio" name="manualDateMode" value="single" checked> Today or pick a date</label>
-                <label class="flex-grow-1"><input type="radio" name="manualDateMode" value="range"> Date range</label>
-            </div>
-            
-            <div id="manualSingleDatePicker" class="mb-2">
-                <input id="manualWatchDateSingle" class="form-control form-control-sm" type="text" placeholder="Pick a date (default: today)" readonly>
-            </div>
-            
-            <div id="manualRangeDatePicker" class="mb-3" hidden>
-                <input id="manualWatchDateStart" class="form-control form-control-sm mb-2" type="text" placeholder="Start date" readonly>
-                <input id="manualWatchDateEnd" class="form-control form-control-sm" type="text" placeholder="End date" readonly>
-            </div>
+                <label class="search-label" for="manualPhotoInput">Photo (optional)</label>
+                <input id="manualPhotoInput" class="search-input" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,image/png,image/jpeg,image/webp,image/gif">
 
-            <p id="manualAddError" class="text-danger small mb-2" hidden></p>
-            <button id="manualAddSubmit" class="btn btn-primary btn-sm" type="button">Add Manually</button>
-        </div>
+                <label class="search-label">Status</label>
+                <div class="d-grid gap-2 mb-3">
+                    <label><input type="checkbox" class="manual-status-checkbox" value="Watched"> Watched</label>
+                    <label><input type="checkbox" class="manual-status-checkbox" value="Watchlist"> Watchlist</label>
+                    <label><input type="checkbox" class="manual-status-checkbox" value="Favourite"> Favourite</label>
+                    <label><input type="checkbox" class="manual-status-checkbox" value="Watching"> Watching</label>
+                </div>
 
-        <div id="statusPrompt" class="mt-3" hidden>
-            <h3 class="h6 mb-2">Set status for <span id="statusPromptMovieTitle"></span></h3>
-            <div class="d-grid gap-2 mb-3">
-                <label><input type="checkbox" class="status-checkbox" value="Watched"> Watched</label>
-                <label><input type="checkbox" class="status-checkbox" value="Watchlist"> Watchlist</label>
-                <label><input type="checkbox" class="status-checkbox" value="Favourite"> Favourite</label>
-                <label><input type="checkbox" class="status-checkbox" value="Watching"> Watching</label>
-            </div>
-            
-            <div class="mb-3">
                 <label class="search-label small">When did you watch it?</label>
                 <div class="d-flex gap-2 mb-2">
-                    <label class="flex-grow-1"><input type="radio" name="dateMode" value="single" checked> Today or pick a date</label>
-                    <label class="flex-grow-1"><input type="radio" name="dateMode" value="range"> Date range (for series)</label>
+                    <label class="flex-grow-1"><input type="radio" name="manualDateMode" value="single" checked> Today or pick a date</label>
+                    <label class="flex-grow-1"><input type="radio" name="manualDateMode" value="range"> Date range</label>
                 </div>
-                
-                <div id="singleDatePicker" class="mb-2">
-                    <input id="watchDateSingle" class="form-control form-control-sm" type="text" placeholder="Pick a date (default: today)" readonly>
+                <div id="manualSingleDatePicker" class="mb-2">
+                    <input id="manualWatchDateSingle" class="form-control form-control-sm" type="text" placeholder="Pick a date (default: today)" readonly>
                 </div>
-                
-                <div id="rangeDatePicker" class="mb-2" hidden>
-                    <input id="watchDateStart" class="form-control form-control-sm mb-2" type="text" placeholder="Start date" readonly>
-                    <input id="watchDateEnd" class="form-control form-control-sm" type="text" placeholder="End date" readonly>
+                <div id="manualRangeDatePicker" class="mb-3" hidden>
+                    <input id="manualWatchDateStart" class="form-control form-control-sm mb-2" type="text" placeholder="Start date" readonly>
+                    <input id="manualWatchDateEnd" class="form-control form-control-sm" type="text" placeholder="End date" readonly>
                 </div>
+
+                <p id="manualAddError" class="text-danger small mb-2" hidden></p>
+                <button id="manualAddSubmit" class="btn btn-primary btn-sm" type="button">Add Manually</button>
             </div>
-            
-            <div class="d-flex gap-2">
-                <button id="confirmAddMovie" class="btn btn-primary btn-sm" type="button">Add Entry</button>
-                <button id="cancelStatusPrompt" class="btn btn-outline-secondary btn-sm" type="button">Back</button>
+
+            <div id="statusPrompt" class="mt-3" hidden>
+                <h3 class="h6 mb-2">Set status for <span id="statusPromptMovieTitle"></span></h3>
+                <div class="d-grid gap-2 mb-3">
+                    <label><input type="checkbox" class="status-checkbox" value="Watched"> Watched</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Watchlist"> Watchlist</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Favourite"> Favourite</label>
+                    <label><input type="checkbox" class="status-checkbox" value="Watching"> Watching</label>
+                </div>
+                <div class="mb-3">
+                    <label class="search-label small">When did you watch it?</label>
+                    <div class="d-flex gap-2 mb-2">
+                        <label class="flex-grow-1"><input type="radio" name="dateMode" value="single" checked> Today or pick a date</label>
+                        <label class="flex-grow-1"><input type="radio" name="dateMode" value="range"> Date range (for series)</label>
+                    </div>
+                    <div id="singleDatePicker" class="mb-2">
+                        <input id="watchDateSingle" class="form-control form-control-sm" type="text" placeholder="Pick a date (default: today)" readonly>
+                    </div>
+                    <div id="rangeDatePicker" class="mb-2" hidden>
+                        <input id="watchDateStart" class="form-control form-control-sm mb-2" type="text" placeholder="Start date" readonly>
+                        <input id="watchDateEnd" class="form-control form-control-sm" type="text" placeholder="End date" readonly>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button id="confirmAddMovie" class="btn btn-primary btn-sm" type="button">Add Entry</button>
+                    <button id="cancelStatusPrompt" class="btn btn-outline-secondary btn-sm" type="button">Back</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<template id="timelineMovieTemplate">
-    <article class="timeline-item movie-item">
-        <div class="movie-card">
-            <button class="remove-card" type="button" aria-label="Remove movie">×</button>
-            <img alt="">
-            <div class="movie-meta">
-                <h3></h3>
-                <p class="watch-date"></p>
-                <p></p>
+    <template id="timelineMovieTemplate">
+        <article class="timeline-item movie-item">
+            <div class="movie-card">
+                <button class="remove-card" type="button" aria-label="Remove movie">×</button>
+                <img alt="">
+                <div class="movie-meta">
+                    <h3></h3>
+                    <p class="watch-date"></p>
+                    <p></p>
+                </div>
             </div>
-        </div>
-    </article>
-</template>
+        </article>
+    </template>
 
-<template id="timelineAddTemplate">
-    <article class="timeline-item add-item">
-        <button class="add-card" type="button" aria-label="Add a movie">
-            <span class="add-icon">+</span>
-            <span class="add-text">Add movie</span>
-        </button>
-    </article>
-</template>
+    <template id="timelineAddTemplate">
+        <article class="timeline-item add-item">
+            <button class="add-card" type="button" aria-label="Add a movie">
+                <span class="add-icon">+</span>
+                <span class="add-text">Add movie</span>
+            </button>
+        </article>
+    </template>
 
+</main>
 {% endblock %}
 
 {% block extra_scripts %}

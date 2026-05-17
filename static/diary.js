@@ -90,6 +90,8 @@ const filterState = {
     useCustomRange: false,
     dateFrom: "",
     dateTo: "",
+    search: "",
+    sort: "date-desc",
 };
 
 function slugify(text) {
@@ -299,18 +301,52 @@ function getVisibleItems() {
     return timelineEntries.filter((item) => matchesCategory(item) && matchesRange(item));
 }
 
+function getSortedItems(items) {
+    const sorted = [...items];
+    const sort = filterState.sort;
+    if (sort === "date-asc") {
+        sorted.sort((a, b) => a.dateISO.localeCompare(b.dateISO));
+    } else if (sort === "date-desc") {
+        sorted.sort((a, b) => b.dateISO.localeCompare(a.dateISO));
+    } else if (sort === "title-asc") {
+        sorted.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sort === "title-desc") {
+        sorted.sort((a, b) => b.title.localeCompare(a.title));
+    }
+    return sorted;
+}
+
+function matchesSearch(item) {
+    const term = filterState.search.trim().toLowerCase();
+    if (!term) return true;
+    return item.title.toLowerCase().includes(term) ||
+           (item.genre || "").toLowerCase().includes(term) ||
+           (item.status || "").toLowerCase().includes(term);
+}
+
 async function renderTimeline() {
-    const items = getVisibleItems();
+    const rawItems = getVisibleItems().filter(matchesSearch);
+    const items = getSortedItems(rawItems);
     timelineTrack.innerHTML = "";
 
     if (items.length === 0) {
         const emptyNode = document.createElement("div");
         emptyNode.className = "empty-timeline";
-        emptyNode.textContent = "No movies match this view yet.";
+        const hasEntries = timelineEntries.length > 0;
+        emptyNode.innerHTML = `
+            <span class="empty-timeline-icon">🎬</span>
+            <p class="empty-timeline-title">${hasEntries ? "No matches found" : "Your diary is empty"}</p>
+            <p class="empty-timeline-hint">${hasEntries ? "Try a different filter, search term, or date range." : "Use the Quick Add strip above or the + button to log your first movie."}</p>
+            ${!hasEntries ? '<button class="empty-timeline-cta" id="emptyAddBtn">+ Add a movie</button>' : ""}
+        `;
         timelineTrack.appendChild(emptyNode);
+        const emptyAddBtn = document.getElementById("emptyAddBtn");
+        if (emptyAddBtn) {
+            emptyAddBtn.addEventListener("click", openModal);
+        }
     }
 
-    items.forEach((item, index) => {
+    items.forEach((item) => {
         const movieNode = movieTemplate.content.cloneNode(true);
         const article = movieNode.querySelector(".timeline-item");
         const image = movieNode.querySelector("img");
@@ -502,6 +538,7 @@ async function addManualMovieEntry() {
 
     await fetchTimelineEntries();
     await renderTimeline();
+    await loadDiaryStats();
     closeModal();
 }
 
@@ -576,6 +613,7 @@ async function confirmAddMovieToTimeline() {
     if (entry) {
         await fetchTimelineEntries();
         await renderTimeline();
+        await loadDiaryStats();
         closeModal();
     }
 }
@@ -585,6 +623,7 @@ async function removeMovieFromTimeline(id) {
     if (success) {
         await fetchTimelineEntries();
         await renderTimeline();
+        await loadDiaryStats();
     }
 }
 
@@ -939,8 +978,78 @@ initializeRangePicker();
 initializeWatchDatePickers();
 syncRangeControls();
 
+// ── Dashboard stats ──
+async function loadDiaryStats() {
+    try {
+        const response = await fetch("/api/diary/stats", {
+            headers: { "Content-Type": "application/json" },
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set("statTotal", data.total ?? 0);
+        set("statWatched", data.watched ?? 0);
+        set("statWatching", data.watching ?? 0);
+        set("statWatchlist", data.watchlist ?? 0);
+        set("statFavourites", data.favourites ?? 0);
+    } catch (err) {
+        console.error("Stats fetch failed:", err);
+    }
+}
+
+// ── Sort buttons ──
+const sortButtons = document.querySelectorAll(".sort-btn");
+sortButtons.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+        filterState.sort = btn.dataset.sort;
+        sortButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        await renderTimeline();
+    });
+});
+
+// ── Timeline search ──
+const timelineSearchInput = document.getElementById("timelineSearch");
+if (timelineSearchInput) {
+    let searchDebounce = null;
+    timelineSearchInput.addEventListener("input", () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(async () => {
+            filterState.search = timelineSearchInput.value;
+            await renderTimeline();
+        }, 200);
+    });
+}
+
+// ── Quick Add cards ──
+document.querySelectorAll(".quick-add-card").forEach((card) => {
+    card.addEventListener("click", () => {
+        const movie = {
+            title: card.dataset.title,
+            poster: card.dataset.poster || "/static/images/posters/placeholder.svg",
+            genre: card.dataset.genre || "",
+        };
+        // Open modal with this movie pre-selected in the status prompt
+        movieModal.hidden = false;
+        movieSearch.value = movie.title;
+        pendingMovie = null;
+        hideStatusPrompt();
+        hideManualAddSection();
+        // Filter catalog to this title and show status prompt immediately
+        const filtered = catalog.filter((m) => m.title.toLowerCase() === movie.title.toLowerCase());
+        if (filtered.length > 0) {
+            renderResults(filtered);
+        } else {
+            // Not in catalog yet — add it as a quick-select entry
+            renderResults([movie]);
+        }
+        movieSearch.focus();
+    });
+});
+
 // Initialize the diary page
 (async () => {
     await fetchTimelineEntries();
     await renderTimeline();
+    await loadDiaryStats();
 })();
