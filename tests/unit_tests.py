@@ -279,3 +279,94 @@ class TestDiaryDeletion:
         # Try to delete other_user's entry
         response = client.delete(f"/api/diary/entries/{entry_id}")
         assert response.status_code == 403
+
+
+# ============================================================================
+# DASHBOARD STATS TESTS
+# ============================================================================
+
+class TestDiaryStats:
+    """Test the /api/diary/stats endpoint."""
+
+    def test_stats_unauthenticated(self, client):
+        """Stats endpoint requires login."""
+        response = client.get("/api/diary/stats")
+        # Should redirect to login (302) or return 401/403
+        assert response.status_code in (302, 401, 403)
+
+    def test_stats_empty_diary(self, authenticated_client):
+        """Stats for a user with no entries should all be zero."""
+        response = authenticated_client.get("/api/diary/stats")
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["total"] == 0
+        assert data["watched"] == 0
+        assert data["watching"] == 0
+        assert data["watchlist"] == 0
+        assert data["favourites"] == 0
+
+    def test_stats_counts_correctly(self, authenticated_client):
+        """Stats reflect actual entry counts after adding entries."""
+        # Add a Watched entry
+        authenticated_client.post(
+            "/api/diary/entries",
+            json={"title": "Stats Movie 1", "status": "Watched", "date": "2024-06-01"},
+        )
+        # Add a Watchlist entry
+        authenticated_client.post(
+            "/api/diary/entries",
+            json={"title": "Stats Movie 2", "status": "Watchlist", "date": "2024-06-02"},
+        )
+        # Add a Favourite entry
+        authenticated_client.post(
+            "/api/diary/entries",
+            json={"title": "Stats Movie 3", "status": "Favourite", "date": "2024-06-03"},
+        )
+
+        response = authenticated_client.get("/api/diary/stats")
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["total"] == 3
+        assert data["watched"] == 1
+        assert data["watchlist"] == 1
+        assert data["favourites"] == 1
+
+    def test_stats_keys_present(self, authenticated_client):
+        """Stats response always contains the expected keys."""
+        response = authenticated_client.get("/api/diary/stats")
+        assert response.status_code == 200
+        data = response.get_json()
+        for key in ("total", "watched", "watching", "watchlist", "favourites"):
+            assert key in data, f"Missing key: {key}"
+
+
+# ============================================================================
+# DIARY PAGE TEMPLATE TESTS
+# ============================================================================
+
+class TestDiaryPage:
+    """Test that the diary page renders new feature sections."""
+
+    def test_diary_page_has_stats_bar(self, authenticated_client):
+        """Diary page should include the stats bar section."""
+        response = authenticated_client.get("/diary")
+        assert response.status_code == 200
+        assert b"statsBar" in response.data or b"stat-pill" in response.data
+
+    def test_diary_page_has_quick_add(self, authenticated_client):
+        """Diary page should include the quick-add recommended section."""
+        response = authenticated_client.get("/diary")
+        assert response.status_code == 200
+        assert b"quick-add" in response.data or b"Quick Add" in response.data
+
+    def test_diary_page_has_sort_buttons(self, authenticated_client):
+        """Diary page should include sort buttons."""
+        response = authenticated_client.get("/diary")
+        assert response.status_code == 200
+        assert b"sort-btn" in response.data or b"Sort By" in response.data
+
+    def test_diary_page_has_timeline_search(self, authenticated_client):
+        """Diary page should include the inline timeline search input."""
+        response = authenticated_client.get("/diary")
+        assert response.status_code == 200
+        assert b"timelineSearch" in response.data or b"Search Timeline" in response.data
